@@ -1,0 +1,46 @@
+"""SEO analysis policies and threshold defaults."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from xseo.domain.enums import IssueSeverity, IssueType
+
+
+@dataclass(frozen=True)
+class ThresholdPolicy:
+    title_min: int = 30
+    title_max: int = 60
+    meta_description_min: int = 70
+    meta_description_max: int = 160
+    thin_content_min_words: int = 200
+
+
+@dataclass(frozen=True)
+class IssueSeverityPolicy:
+    severities: dict[IssueType, IssueSeverity] = field(
+        default_factory=lambda: {
+            IssueType.BROKEN_INTERNAL_LINK: IssueSeverity.HIGH,
+            IssueType.REDIRECTING_URL: IssueSeverity.LOW,
+            IssueType.TITLE_MISSING: IssueSeverity.MEDIUM,
+            IssueType.TITLE_DUPLICATE: IssueSeverity.MEDIUM,
+            IssueType.TITLE_TOO_SHORT: IssueSeverity.LOW,
+            IssueType.TITLE_TOO_LONG: IssueSeverity.LOW,
+            IssueType.META_DESCRIPTION_MISSING: IssueSeverity.MEDIUM,
+            IssueType.META_DESCRIPTION_DUPLICATE: IssueSeverity.MEDIUM,
+            IssueType.META_DESCRIPTION_TOO_SHORT: IssueSeverity.LOW,
+            IssueType.META_DESCRIPTION_TOO_LONG: IssueSeverity.LOW,
+            IssueType.H1_MISSING: IssueSeverity.MEDIUM,
+            IssueType.H1_MULTIPLE: IssueSeverity.MEDIUM,
+            IssueType.CANONICAL_MISMATCH: IssueSeverity.HIGH,
+            IssueType.THIN_CONTENT: IssueSeverity.LOW,
+            IssueType.EXACT_DUPLICATE: IssueSeverity.MEDIUM,
+        }
+    )
+
+    def severity_for(self, issue_type):
+        return self.severities[issue_type]
+
+
+DEFAULT_THRESHOLDS = ThresholdPolicy()
+DEFAULT_SEVERITY_POLICY = IssueSeverityPolicy()
