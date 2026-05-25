@@ -28,7 +28,9 @@ class EventDeliveryService:
         self._subscription_index = {}
 
     def subscribe(self, crawl_id, callback):
-        subscription = Subscription(f"subscription-{next(self._counter)}", crawl_id, callback)
+        subscription = Subscription(
+            f"subscription-{next(self._counter)}", crawl_id, callback
+        )
         key = _key(crawl_id)
         self._subscribers.setdefault(key, []).append(subscription)
         self._subscription_index[subscription.subscription_id] = key

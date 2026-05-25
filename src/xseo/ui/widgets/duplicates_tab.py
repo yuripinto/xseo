@@ -38,8 +38,14 @@ class DuplicatesTab(QWidget):
                 if attr == "page_count":
                     item: QTableWidgetItem = _NumericItem(raw)
                 elif attr == "content_hash":
-                    hash_val = getattr(raw, "value", str(raw)) if raw is not None else ""
-                    item = QTableWidgetItem(str(hash_val)[:16] + "…" if len(str(hash_val)) > 16 else str(hash_val))
+                    hash_val = (
+                        getattr(raw, "value", str(raw)) if raw is not None else ""
+                    )
+                    item = QTableWidgetItem(
+                        str(hash_val)[:16] + "…"
+                        if len(str(hash_val)) > 16
+                        else str(hash_val)
+                    )
                 else:
                     text = getattr(raw, "value", raw) if raw is not None else ""
                     item = QTableWidgetItem(str(text))

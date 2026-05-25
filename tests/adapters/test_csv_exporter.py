@@ -38,8 +38,26 @@ def test_csv_exporter_writes_pages_with_stable_headers(tmp_path):
         rows = list(csv.reader(handle))
     assert result.kind == ExportKind.PAGES
     assert result.row_count == 1
-    assert rows[0] == list(("page_id", "url", "final_url", "status_code", "title", "meta_description", "canonical_url", "word_count", "content_type"))
-    assert rows[1][0:5] == ["page-1", "https://example.com/", "https://example.com/", "200", "Home"]
+    assert rows[0] == list(
+        (
+            "page_id",
+            "url",
+            "final_url",
+            "status_code",
+            "title",
+            "meta_description",
+            "canonical_url",
+            "word_count",
+            "content_type",
+        )
+    )
+    assert rows[1][0:5] == [
+        "page-1",
+        "https://example.com/",
+        "https://example.com/",
+        "200",
+        "Home",
+    ]
 
 
 def test_csv_exporter_writes_issues_with_stable_headers(tmp_path):
@@ -81,7 +99,9 @@ def test_export_service_passes_crawl_id_to_csv_adapter(tmp_path):
     service = ExportApplicationService(ReadRepository(), adapter)
     crawl_id = _id(CrawlId, "crawl-from-command")
 
-    result = service.export(ExportCommand(crawl_id, ExportKind.PAGES, tmp_path / "pages.csv"))
+    result = service.export(
+        ExportCommand(crawl_id, ExportKind.PAGES, tmp_path / "pages.csv")
+    )
 
     assert result.success
     assert result.value.export_result.crawl_id == crawl_id

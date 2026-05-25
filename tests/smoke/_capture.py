@@ -109,7 +109,9 @@ class CaptureContext:
 
     def _on_thread_exception(self, args) -> None:
         formatted = "".join(
-            traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback)
+            traceback.format_exception(
+                args.exc_type, args.exc_value, args.exc_traceback
+            )
         )
         name = getattr(args.thread, "name", "?")
         self.report.exceptions.append(f"[thread:{name}] {formatted}")

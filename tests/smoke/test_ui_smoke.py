@@ -48,12 +48,10 @@ if str(_PROJECT_ROOT) not in sys.path:
 from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtWidgets import QApplication
 
-from xseo.application.events import CrawlProgressEventKind
-from xseo.ui.app import MainWindow, build_services
-
 from tests.smoke._capture import CaptureContext, SmokeReport
 from tests.smoke._fakesite import FakeSite
-
+from xseo.application.events import CrawlProgressEventKind
+from xseo.ui.app import MainWindow, build_services
 
 CRAWL_TIMEOUT_SECONDS = 15.0
 EVENT_LOOP_TICK_MS = 50
@@ -155,7 +153,9 @@ def _run_smoke(tmp_dir: Path) -> tuple[SmokeReport, list[str]]:
             try:
                 window._control._on_start()
             except Exception:
-                defects.append("ControlPanel._on_start raised:\n" + traceback.format_exc())
+                defects.append(
+                    "ControlPanel._on_start raised:\n" + traceback.format_exc()
+                )
 
             crawl_id = window._controller.state.selected_crawl_id
             if crawl_id is None:
@@ -232,7 +232,9 @@ def _run_smoke(tmp_dir: Path) -> tuple[SmokeReport, list[str]]:
                     from xseo.ui.widgets.page_detail import PageDetailDialog
 
                     detail_result = results_service.get_page_detail(
-                        PageDetailQuery(window._controller.state.selected_crawl_id, page_id)
+                        PageDetailQuery(
+                            window._controller.state.selected_crawl_id, page_id
+                        )
                     )
                     if not detail_result.success:
                         defects.append(
@@ -245,7 +247,8 @@ def _run_smoke(tmp_dir: Path) -> tuple[SmokeReport, list[str]]:
                         dialog.close()
                 except Exception:
                     defects.append(
-                        "PageDetailDialog construction raised:\n" + traceback.format_exc()
+                        "PageDetailDialog construction raised:\n"
+                        + traceback.format_exc()
                     )
 
             # --- 6. CSV export --------------------------------------------

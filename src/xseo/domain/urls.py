@@ -22,7 +22,9 @@ class RawUrl:
     @classmethod
     def create(cls, value: str) -> ValidationResult["RawUrl"]:
         if not isinstance(value, str) or not value.strip():
-            return ValidationResult.failure(_url_error(UrlErrorCode.EMPTY, "URL is empty"))
+            return ValidationResult.failure(
+                _url_error(UrlErrorCode.EMPTY, "URL is empty")
+            )
         parsed = urlparse(value.strip())
         if parsed.scheme and parsed.scheme not in _CRAWLABLE_SCHEMES:
             return ValidationResult.failure(
@@ -55,11 +57,15 @@ def _absolute_url(cls, value: str):
 
     parsed = urlparse(value.strip())
     if not parsed.scheme:
-        return ValidationResult.failure(_url_error(UrlErrorCode.INVALID, "URL has no scheme"))
+        return ValidationResult.failure(
+            _url_error(UrlErrorCode.INVALID, "URL has no scheme")
+        )
     if parsed.scheme not in _CRAWLABLE_SCHEMES:
         return ValidationResult.failure(
             _url_error(UrlErrorCode.UNSUPPORTED_SCHEME, "URL scheme is unsupported")
         )
     if not parsed.netloc:
-        return ValidationResult.failure(_url_error(UrlErrorCode.MISSING_HOST, "URL has no host"))
+        return ValidationResult.failure(
+            _url_error(UrlErrorCode.MISSING_HOST, "URL has no host")
+        )
     return ValidationResult.success(cls(value.strip()))

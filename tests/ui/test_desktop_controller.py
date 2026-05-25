@@ -1,7 +1,7 @@
 from xseo.application.results import ApplicationResult, ExportStatus
-from xseo.ui import XseoDesktopController
 from xseo.domain.enums import CrawlStatus, ExportKind
 from xseo.domain.ids import CrawlId
+from xseo.ui import XseoDesktopController
 
 
 def _crawl_id(value="crawl-1"):
@@ -15,11 +15,17 @@ class CrawlService:
 
     def start_crawl(self, command):
         self.started.append(command)
-        return ApplicationResult.ok(type("Session", (), {"crawl_id": _crawl_id(), "status": CrawlStatus.CREATED})())
+        return ApplicationResult.ok(
+            type(
+                "Session", (), {"crawl_id": _crawl_id(), "status": CrawlStatus.CREATED}
+            )()
+        )
 
     def request_stop(self, command):
         self.stopped.append(command)
-        return ApplicationResult.ok(type("Active", (), {"status": CrawlStatus.STOPPING})())
+        return ApplicationResult.ok(
+            type("Active", (), {"status": CrawlStatus.STOPPING})()
+        )
 
 
 class ResultsService:

@@ -12,7 +12,10 @@ from xseo.adapters.persistence import (
     SQLiteResultsReadRepository,
 )
 from xseo.application import ExportCommand, ResultQuery
-from xseo.application.services import ExportApplicationService, ResultsApplicationService
+from xseo.application.services import (
+    ExportApplicationService,
+    ResultsApplicationService,
+)
 from xseo.domain.analysis import IssueAnalysisService
 from xseo.domain.duplicates import detect_duplicate_groups
 from xseo.domain.entities import Crawl, CrawlConfig, FetchResult
@@ -20,7 +23,6 @@ from xseo.domain.enums import ExportKind, FetchStatus, IssueType
 from xseo.domain.extraction import SeoExtractionPipeline
 from xseo.domain.ids import CrawlId, PageId
 from xseo.domain.urls import BaseUrl, NormalizedUrl
-
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "site"
 
@@ -57,7 +59,9 @@ def test_fixture_pipeline_persists_reads_and_exports(tmp_path):
     analysis_repo = SQLiteAnalysisRepository(conn)
     read_repo = SQLiteResultsReadRepository(conn)
     results_service = ResultsApplicationService(read_repo)
-    export_service = ExportApplicationService(read_repo, CsvExportAdapter(), SQLiteExportRepository(conn))
+    export_service = ExportApplicationService(
+        read_repo, CsvExportAdapter(), SQLiteExportRepository(conn)
+    )
     extractor = SeoExtractionPipeline()
     extracted = []
 
@@ -70,13 +74,17 @@ def test_fixture_pipeline_persists_reads_and_exports(tmp_path):
         ),
         start=1,
     ):
-        output = extractor.extract(_fetch(fixture, url), crawl_id, _id(PageId, f"page-{index}"))
+        output = extractor.extract(
+            _fetch(fixture, url), crawl_id, _id(PageId, f"page-{index}")
+        )
         page = output.extraction_result.page
         extracted.append(page)
         data_repo.save_page(page)
         data_repo.save_headings(page.page_id, output.extraction_result.headings)
 
-    issues = IssueAnalysisService().detect_issues(crawl_id, tuple(extracted), data_repo.load_analysis_data(crawl_id).headings)
+    issues = IssueAnalysisService().detect_issues(
+        crawl_id, tuple(extracted), data_repo.load_analysis_data(crawl_id).headings
+    )
     duplicate_groups = detect_duplicate_groups(crawl_id, tuple(extracted))
     analysis_repo.save_issues(crawl_id, issues)
     analysis_repo.save_duplicate_groups(crawl_id, duplicate_groups)
@@ -84,7 +92,9 @@ def test_fixture_pipeline_persists_reads_and_exports(tmp_path):
     pages = results_service.list_pages(ResultQuery(crawl_id))
     issue_rows = results_service.list_issues(ResultQuery(crawl_id))
     groups = results_service.list_duplicate_groups(ResultQuery(crawl_id))
-    export = export_service.export(ExportCommand(crawl_id, ExportKind.PAGES, tmp_path / "pages.csv"))
+    export = export_service.export(
+        ExportCommand(crawl_id, ExportKind.PAGES, tmp_path / "pages.csv")
+    )
 
     with (tmp_path / "pages.csv").open(newline="", encoding="utf-8") as handle:
         exported_pages = list(csv.DictReader(handle))

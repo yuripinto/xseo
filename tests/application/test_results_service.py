@@ -15,7 +15,9 @@ def _url(value):
 
 def _row(page_id, path, status_code, title):
     url = _url(f"https://example.com/{path}")
-    return PageRow(_id(PageId, page_id), url, url, status_code, title, None, None, 100, "text/html")
+    return PageRow(
+        _id(PageId, page_id), url, url, status_code, title, None, None, 100, "text/html"
+    )
 
 
 class ReadRepository:

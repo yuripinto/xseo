@@ -20,15 +20,23 @@ def test_normalizer_preserves_query_and_trailing_slash_distinctions():
 
 
 def test_normalizer_resolves_relative_urls():
-    result = UrlNormalizer().normalize_discovered("../next", "https://example.com/a/b/page")
+    result = UrlNormalizer().normalize_discovered(
+        "../next", "https://example.com/a/b/page"
+    )
 
     assert result.ok
     assert result.value.value == "https://example.com/a/next"
 
 
 def test_normalizer_removes_default_ports():
-    assert UrlNormalizer().normalize("http://example.com:80/").value.value == "http://example.com/"
-    assert UrlNormalizer().normalize("https://example.com:443/").value.value == "https://example.com/"
+    assert (
+        UrlNormalizer().normalize("http://example.com:80/").value.value
+        == "http://example.com/"
+    )
+    assert (
+        UrlNormalizer().normalize("https://example.com:443/").value.value
+        == "https://example.com/"
+    )
 
 
 def test_normalizer_rejects_unsupported_scheme():

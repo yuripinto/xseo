@@ -49,7 +49,9 @@ def test_frontier_counts_successful_pages_only():
 
     frontier.mark_visited(
         success_url,
-        FetchResult(success_url, success_url, FetchStatus.SUCCESS, content_type="text/html"),
+        FetchResult(
+            success_url, success_url, FetchStatus.SUCCESS, content_type="text/html"
+        ),
     )
     frontier.mark_failed(
         failed_url,

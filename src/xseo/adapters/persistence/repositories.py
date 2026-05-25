@@ -6,23 +6,31 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from xseo.application.commands import QueryOptions, ResultQuery
-from xseo.application.read_models import DuplicateGroupRow, IssueRow, PageDetail, PageRow
+from xseo.application.read_models import (
+    DuplicateGroupRow,
+    IssueRow,
+    PageDetail,
+    PageRow,
+)
 from xseo.domain.entities import (
     Crawl,
     CrawlConfig,
-    DuplicateGroup,
-    ExportResult,
     ExtractedPage,
     Heading,
-    Issue,
     PageLink,
     Redirect,
 )
-from xseo.domain.enums import CrawlStatus, ExportKind, HeadingLevel, IssueSeverity, IssueType, LinkRelation
+from xseo.domain.enums import (
+    CrawlStatus,
+    HeadingLevel,
+    IssueSeverity,
+    IssueType,
+    LinkRelation,
+)
 from xseo.domain.errors import DomainError
-from xseo.domain.ids import CrawlId, DuplicateGroupId, ExportId, IssueId, PageId
+from xseo.domain.ids import CrawlId, DuplicateGroupId, IssueId, PageId
 from xseo.domain.urls import BaseUrl, NormalizedUrl
-from xseo.domain.value_objects import ContentHash, FilePath, WordCount
+from xseo.domain.value_objects import ContentHash, WordCount
 
 
 @dataclass(frozen=True)
@@ -134,7 +142,12 @@ class SQLiteCrawlDataRepository:
                     INSERT OR REPLACE INTO headings(page_id, level, text, position)
                     VALUES (?, ?, ?, ?)
                     """,
-                    (_value(page_id), heading.level.value, heading.text, heading.position),
+                    (
+                        _value(page_id),
+                        heading.level.value,
+                        heading.text,
+                        heading.position,
+                    ),
                 )
 
     def save_redirect(self, redirect):
@@ -226,7 +239,11 @@ class SQLiteAnalysisRepository:
                     INSERT OR REPLACE INTO duplicate_groups(duplicate_group_id, crawl_id, content_hash)
                     VALUES (?, ?, ?)
                     """,
-                    (group.duplicate_group_id.value, group.crawl_id.value, group.content_hash.value),
+                    (
+                        group.duplicate_group_id.value,
+                        group.crawl_id.value,
+                        group.content_hash.value,
+                    ),
                 )
                 for page_id in group.page_ids:
                     self.connection.execute(
@@ -278,7 +295,9 @@ class SQLiteResultsReadRepository:
             GROUP BY dg.duplicate_group_id, dg.content_hash
         """
         rows = self.connection.execute(
-            _apply_query_sql(sql, query.options, _DUPLICATE_SORT_FIELDS, "dg.duplicate_group_id"),
+            _apply_query_sql(
+                sql, query.options, _DUPLICATE_SORT_FIELDS, "dg.duplicate_group_id"
+            ),
             (_value(query.crawl_id),),
         )
         return tuple(_duplicate_group_row_from_row(row) for row in rows)
@@ -331,7 +350,9 @@ class SQLiteResultsReadRepository:
             headings=headings,
             outlinks=links,
             redirects=redirects,
-            content_hash=ContentHash.create(page["content_hash"]).value if page["content_hash"] else None,
+            content_hash=ContentHash.create(page["content_hash"]).value
+            if page["content_hash"]
+            else None,
             issues=issues,
         )
 
@@ -395,7 +416,6 @@ _DUPLICATE_SORT_FIELDS = {
 
 
 def _query(crawl_id):
-    from xseo.application.commands import ResultQuery
 
     return ResultQuery(crawl_id)
 
@@ -455,7 +475,11 @@ def _page_params(page):
 
 
 def _crawl_from_row(row):
-    failure = DomainError.of(row["failure_code"], row["failure_message"]) if row["failure_code"] else None
+    failure = (
+        DomainError.of(row["failure_code"], row["failure_message"])
+        if row["failure_code"]
+        else None
+    )
     config = CrawlConfig(
         BaseUrl.create(row["start_url"]).value,
         bool(row["same_host_only"]),
@@ -483,7 +507,9 @@ def _page_from_row(row):
         row["content_type"],
         row["title"],
         row["meta_description"],
-        NormalizedUrl.create(row["canonical_url"]).value if row["canonical_url"] else None,
+        NormalizedUrl.create(row["canonical_url"]).value
+        if row["canonical_url"]
+        else None,
         row["robots_meta"],
         WordCount.create(row["word_count"]).value,
         row["content_length"],
@@ -527,7 +553,9 @@ def _page_row_from_row(row):
         row["status_code"],
         row["title"],
         row["meta_description"],
-        NormalizedUrl.create(row["canonical_url"]).value if row["canonical_url"] else None,
+        NormalizedUrl.create(row["canonical_url"]).value
+        if row["canonical_url"]
+        else None,
         row["word_count"],
         row["content_type"],
     )
@@ -549,7 +577,9 @@ def _duplicate_group_row_from_row(row):
         DuplicateGroupId.create(row["duplicate_group_id"]).value,
         ContentHash.create(row["content_hash"]).value,
         row["page_count"],
-        NormalizedUrl.create(row["representative_url"]).value if row["representative_url"] else None,
+        NormalizedUrl.create(row["representative_url"]).value
+        if row["representative_url"]
+        else None,
     )
 
 

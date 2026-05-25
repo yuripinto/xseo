@@ -38,7 +38,12 @@ def _page(**overrides):
 
 
 def _h1(page, position=1):
-    return Heading(page_id=page.page_id, level=HeadingLevel.H1, text="Main heading", position=position)
+    return Heading(
+        page_id=page.page_id,
+        level=HeadingLevel.H1,
+        text="Main heading",
+        position=position,
+    )
 
 
 def _issue_types(issues):
@@ -46,7 +51,9 @@ def _issue_types(issues):
 
 
 def test_detects_missing_title_meta_h1_and_thin_content():
-    page = _page(title=" ", meta_description=None, word_count=WordCount.create(42).value)
+    page = _page(
+        title=" ", meta_description=None, word_count=WordCount.create(42).value
+    )
 
     issues = detect_page_issues(page, headings=())
 
@@ -56,7 +63,10 @@ def test_detects_missing_title_meta_h1_and_thin_content():
         IssueType.H1_MISSING,
         IssueType.THIN_CONTENT,
     }
-    assert {issue.severity for issue in issues} == {IssueSeverity.MEDIUM, IssueSeverity.LOW}
+    assert {issue.severity for issue in issues} == {
+        IssueSeverity.MEDIUM,
+        IssueSeverity.LOW,
+    }
 
 
 def test_detects_title_and_meta_threshold_issues():
@@ -86,7 +96,9 @@ def test_detects_multiple_h1_and_canonical_mismatch():
 
     assert IssueType.H1_MULTIPLE in _issue_types(issues)
     assert IssueType.CANONICAL_MISMATCH in _issue_types(issues)
-    canonical_issue = next(issue for issue in issues if issue.issue_type == IssueType.CANONICAL_MISMATCH)
+    canonical_issue = next(
+        issue for issue in issues if issue.issue_type == IssueType.CANONICAL_MISMATCH
+    )
     assert canonical_issue.severity == IssueSeverity.HIGH
 
 

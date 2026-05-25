@@ -7,7 +7,7 @@ from xseo.domain.crawler import UrlCrawlEngine
 from xseo.domain.entities import Crawl, CrawlConfig, FetchResult
 from xseo.domain.enums import CrawlStatus, FetchStatus
 from xseo.domain.ids import CrawlId
-from xseo.domain.urls import BaseUrl, NormalizedUrl
+from xseo.domain.urls import BaseUrl
 
 
 class StaticClock:
@@ -61,10 +61,15 @@ def _crawl(limit):
     return Crawl.create(crawl_id, config, datetime(2026, 1, 1, tzinfo=UTC))
 
 
-@given(st.integers(min_value=1, max_value=10), st.lists(st.sampled_from(list(FetchStatus)), min_size=1, max_size=20))
+@given(
+    st.integers(min_value=1, max_value=10),
+    st.lists(st.sampled_from(list(FetchStatus)), min_size=1, max_size=20),
+)
 def test_crawl_engine_never_exceeds_successful_page_limit(limit, statuses):
     fetch = SequenceFetch(statuses)
-    engine = UrlCrawlEngine(fetch, RecordingPublisher(), StaticClock(), link_discovery=ManyLinks())
+    engine = UrlCrawlEngine(
+        fetch, RecordingPublisher(), StaticClock(), link_discovery=ManyLinks()
+    )
 
     result = engine.run(_crawl(limit))
 
@@ -74,7 +79,9 @@ def test_crawl_engine_never_exceeds_successful_page_limit(limit, statuses):
 @given(st.integers(min_value=0, max_value=5))
 def test_crawl_engine_starts_no_fetch_after_observed_stop(stop_after):
     fetch = SequenceFetch([FetchStatus.SUCCESS] * 10)
-    engine = UrlCrawlEngine(fetch, RecordingPublisher(), StaticClock(), link_discovery=ManyLinks())
+    engine = UrlCrawlEngine(
+        fetch, RecordingPublisher(), StaticClock(), link_discovery=ManyLinks()
+    )
 
     result = engine.run(_crawl(10), stop_token=StopAfterFetch(stop_after, fetch))
 

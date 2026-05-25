@@ -12,13 +12,21 @@ def validate_query_options(options, allowed_sort_fields):
     if options is None:
         return ApplicationResult.ok(QueryOptions())
     if options.sort_direction not in {"asc", "desc"}:
-        return ApplicationResult.fail("Sort direction must be asc or desc", "query.invalid_sort_direction")
+        return ApplicationResult.fail(
+            "Sort direction must be asc or desc", "query.invalid_sort_direction"
+        )
     if options.sort_field is not None and options.sort_field not in allowed_sort_fields:
-        return ApplicationResult.fail("Sort field is not supported", "query.invalid_sort_field")
+        return ApplicationResult.fail(
+            "Sort field is not supported", "query.invalid_sort_field"
+        )
     if options.page_size is not None and options.page_size <= 0:
-        return ApplicationResult.fail("Page size must be positive", "query.invalid_page_size")
+        return ApplicationResult.fail(
+            "Page size must be positive", "query.invalid_page_size"
+        )
     if options.offset < 0:
-        return ApplicationResult.fail("Offset must be non-negative", "query.invalid_offset")
+        return ApplicationResult.fail(
+            "Offset must be non-negative", "query.invalid_offset"
+        )
     return ApplicationResult.ok(options)
 
 
@@ -34,7 +42,10 @@ def apply_query_options(rows, options=None, allowed_sort_fields=()):
         result = tuple(
             sorted(
                 result,
-                key=lambda row: (_sort_value(getattr(row, options.sort_field)), _stable_row_key(row)),
+                key=lambda row: (
+                    _sort_value(getattr(row, options.sort_field)),
+                    _stable_row_key(row),
+                ),
                 reverse=reverse,
             )
         )

@@ -21,11 +21,15 @@ class SeoExtractionPipeline:
 
     def extract(self, fetch_result, crawl_id, page_id, encoding=None):
         try:
-            if fetch_result.status != FetchStatus.SUCCESS or not _is_html(fetch_result.content_type):
+            if fetch_result.status != FetchStatus.SUCCESS or not _is_html(
+                fetch_result.content_type
+            ):
                 return SeoExtractionOutput(
                     ExtractionResult(
                         page=None,
-                        error=DomainError.of("extraction.not_html", "Fetch result is not successful HTML"),
+                        error=DomainError.of(
+                            "extraction.not_html", "Fetch result is not successful HTML"
+                        ),
                     )
                 )
 

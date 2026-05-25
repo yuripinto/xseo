@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
-import pytest
-
 from xseo.application.events import CrawlProgressEvent, CrawlProgressEventKind
 from xseo.application.read_models import DuplicateGroupRow, IssueRow, PageRow
 from xseo.application.results import ApplicationResult
@@ -16,10 +14,10 @@ from xseo.domain.urls import NormalizedUrl
 from xseo.domain.value_objects import ContentHash
 from xseo.ui.desktop import DesktopState
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _url(v: str) -> object:
     return NormalizedUrl.create(v).value
@@ -29,7 +27,9 @@ def _page_id(v: str) -> object:
     return PageId.create(v).value
 
 
-def _page_row(page_id: str = "p-1", url: str = "https://example.com/", status: int = 200) -> PageRow:
+def _page_row(
+    page_id: str = "p-1", url: str = "https://example.com/", status: int = 200
+) -> PageRow:
     return PageRow(
         page_id=_page_id(page_id),
         url=_url(url),
@@ -43,7 +43,9 @@ def _page_row(page_id: str = "p-1", url: str = "https://example.com/", status: i
     )
 
 
-def _issue_row(issue_id: str = "i-1", severity: IssueSeverity = IssueSeverity.HIGH) -> IssueRow:
+def _issue_row(
+    issue_id: str = "i-1", severity: IssueSeverity = IssueSeverity.HIGH
+) -> IssueRow:
     return IssueRow(
         issue_id=IssueId.create(issue_id).value,
         affected_url=_url("https://example.com/"),
@@ -103,15 +105,20 @@ def _make_controller(
 
     if start_ok:
         from xseo.application.read_models import CrawlSession
+
         session = CrawlSession(crawl_id=crawl_id, status=CrawlStatus.RUNNING)
         ctrl.start_crawl.return_value = ApplicationResult.ok(session)
     else:
-        ctrl.start_crawl.return_value = ApplicationResult.fail("Invalid URL", "crawl.invalid")
+        ctrl.start_crawl.return_value = ApplicationResult.fail(
+            "Invalid URL", "crawl.invalid"
+        )
 
     if stop_ok:
         ctrl.stop_crawl.return_value = ApplicationResult.ok(None)
     else:
-        ctrl.stop_crawl.return_value = ApplicationResult.fail("Stop failed", "crawl.stop_failed")
+        ctrl.stop_crawl.return_value = ApplicationResult.fail(
+            "Stop failed", "crawl.stop_failed"
+        )
 
     _state = state or _fake_desktop_state(selected_crawl_id=crawl_id)
     ctrl.state = _state
@@ -122,7 +129,9 @@ def _make_controller(
 def _make_results_service(*, recent_crawl=None) -> MagicMock:
     svc = MagicMock()
     if recent_crawl is None:
-        svc.get_recent_crawl.return_value = ApplicationResult.fail("none", "crawl.no_recent")
+        svc.get_recent_crawl.return_value = ApplicationResult.fail(
+            "none", "crawl.no_recent"
+        )
     else:
         svc.get_recent_crawl.return_value = ApplicationResult.ok(recent_crawl)
     svc.list_pages.return_value = ApplicationResult.ok(())
@@ -151,6 +160,7 @@ def _make_window(qapp, *, state=None, start_ok=True, stop_ok=True, recent_crawl=
 # ---------------------------------------------------------------------------
 # ControlPanel
 # ---------------------------------------------------------------------------
+
 
 def test_control_panel_initial_state(qapp):
     from xseo.ui.widgets.control_panel import ControlPanel
@@ -185,7 +195,10 @@ def test_control_panel_empty_url_does_not_emit(qapp, qtbot):
     panel.url_input.setText("")
     signals = []
     panel.start_requested.connect(lambda *a: signals.append(a))
-    qtbot.mouseClick(panel.start_btn, __import__("PySide6.QtCore", fromlist=["Qt"]).Qt.MouseButton.LeftButton)
+    qtbot.mouseClick(
+        panel.start_btn,
+        __import__("PySide6.QtCore", fromlist=["Qt"]).Qt.MouseButton.LeftButton,
+    )
     assert signals == [], "start_requested must not fire with empty URL"
 
 
@@ -196,7 +209,10 @@ def test_control_panel_valid_url_emits_start(qapp, qtbot):
     panel.url_input.setText("https://example.com/")
     signals = []
     panel.start_requested.connect(lambda *a: signals.append(a))
-    qtbot.mouseClick(panel.start_btn, __import__("PySide6.QtCore", fromlist=["Qt"]).Qt.MouseButton.LeftButton)
+    qtbot.mouseClick(
+        panel.start_btn,
+        __import__("PySide6.QtCore", fromlist=["Qt"]).Qt.MouseButton.LeftButton,
+    )
     assert len(signals) == 1
     url, page_limit, timeout, same_host = signals[0]
     assert url == "https://example.com/"
@@ -222,6 +238,7 @@ def test_control_panel_export_enabled_toggle(qapp):
 # ProgressTab
 # ---------------------------------------------------------------------------
 
+
 def test_progress_tab_reset_clears_all(qapp):
     from xseo.ui.widgets.progress_tab import ProgressTab
 
@@ -241,7 +258,10 @@ def test_progress_tab_update_from_page_fetched_event(qapp):
     from xseo.ui.widgets.progress_tab import ProgressTab
 
     tab = ProgressTab()
-    event = _progress_event(kind=CrawlProgressEventKind.PAGE_FETCHED, message="Fetched url (3 pages, 0 errors)")
+    event = _progress_event(
+        kind=CrawlProgressEventKind.PAGE_FETCHED,
+        message="Fetched url (3 pages, 0 errors)",
+    )
     tab.update_from_event(event)
     assert tab._status_label.text() == "running"
     assert "3 pages" in tab._log.toPlainText()
@@ -268,11 +288,13 @@ def test_progress_tab_terminal_event_resets_url_label(qapp):
     tab.update_from_event(_progress_event(message="current url"))
     assert tab._url_label.text() != "—"
 
-    tab.update_from_event(_progress_event(
-        kind=CrawlProgressEventKind.CRAWL_COMPLETED,
-        status=CrawlStatus.COMPLETED,
-        message="Done",
-    ))
+    tab.update_from_event(
+        _progress_event(
+            kind=CrawlProgressEventKind.CRAWL_COMPLETED,
+            status=CrawlStatus.COMPLETED,
+            message="Done",
+        )
+    )
     assert tab._url_label.text() == "—", "URL label must be cleared on terminal event"
 
 
@@ -291,6 +313,7 @@ def test_progress_tab_set_counts(qapp):
 # PagesTab — including sort-stability of page_id selection
 # ---------------------------------------------------------------------------
 
+
 def test_pages_tab_populate_row_count(qapp):
     from xseo.ui.widgets.pages_tab import PagesTab
 
@@ -303,6 +326,7 @@ def test_pages_tab_double_click_emits_correct_page_id(qapp, qtbot):
     """Emitted page_id must match the UserRole data of the visually selected row,
     regardless of what sort order the table is currently in."""
     from PySide6.QtCore import Qt
+
     from xseo.ui.widgets.pages_tab import PagesTab
 
     tab = PagesTab()
@@ -326,6 +350,7 @@ def test_pages_tab_page_id_correct_after_sort(qapp, qtbot):
     """After sorting the table by status code, double-clicking a row must
     open the page detail for the *visually selected* row, not the original row."""
     from PySide6.QtCore import Qt
+
     from xseo.ui.widgets.pages_tab import PagesTab
 
     tab = PagesTab()
@@ -364,8 +389,10 @@ def test_pages_tab_empty_populate_no_crash(qapp):
 # IssuesTab
 # ---------------------------------------------------------------------------
 
+
 def test_issues_tab_no_severity_background(qapp):
     from PySide6.QtCore import Qt
+
     from xseo.ui.widgets.issues_tab import IssuesTab
 
     tab = IssuesTab()
@@ -388,6 +415,7 @@ def test_issues_tab_no_severity_background(qapp):
 # DuplicatesTab
 # ---------------------------------------------------------------------------
 
+
 def test_duplicates_tab_populate(qapp):
     from xseo.ui.widgets.duplicates_tab import DuplicatesTab
 
@@ -399,6 +427,7 @@ def test_duplicates_tab_populate(qapp):
 # ---------------------------------------------------------------------------
 # EventBridge
 # ---------------------------------------------------------------------------
+
 
 def test_event_bridge_drains_queue_to_signal(qapp, qtbot):
     from xseo.ui.bridge import EventBridge
@@ -433,6 +462,7 @@ def test_event_bridge_multiple_events_drained_in_order(qapp, qtbot):
 # MainWindow integration
 # ---------------------------------------------------------------------------
 
+
 def test_main_window_starts_clean(qapp, tmp_path):
     from xseo.ui.app import MainWindow, build_services
 
@@ -460,7 +490,9 @@ def test_main_window_start_crawl_failure_shows_error(qapp):
     w, ctrl, results, events = _make_window(qapp, start_ok=False)
     w._on_start("bad-url", 100, 10, True)
     assert "red" in w._status_label.styleSheet()
-    assert w._control.start_btn.isEnabled(), "start button must stay enabled after failure"
+    assert w._control.start_btn.isEnabled(), (
+        "start button must stay enabled after failure"
+    )
     assert not w._control.stop_btn.isEnabled()
 
 
@@ -478,11 +510,16 @@ def test_main_window_stop_crawl_failure_shows_error(qapp):
         last_error="No crawl selected",
     )
     w, ctrl, _, _ = _make_window(qapp, stop_ok=False, state=error_state)
-    ctrl.stop_crawl.return_value = None  # controller sets last_error instead of returning result
+    ctrl.stop_crawl.return_value = (
+        None  # controller sets last_error instead of returning result
+    )
     ctrl.state = error_state
     w._on_stop()
     # Should show the last_error, not "Stop requested"
-    assert w._status_label.text() != "Stop requested" or "red" not in w._status_label.styleSheet()
+    assert (
+        w._status_label.text() != "Stop requested"
+        or "red" not in w._status_label.styleSheet()
+    )
 
 
 def test_main_window_terminal_event_re_enables_start(qapp):
@@ -498,10 +535,14 @@ def test_main_window_terminal_event_re_enables_start(qapp):
     w._on_start("https://example.com/", 100, 10, True)
     assert not w._control.start_btn.isEnabled()
 
-    event = _progress_event(kind=CrawlProgressEventKind.CRAWL_COMPLETED, status=CrawlStatus.COMPLETED)
+    event = _progress_event(
+        kind=CrawlProgressEventKind.CRAWL_COMPLETED, status=CrawlStatus.COMPLETED
+    )
     w._on_progress(event)
 
-    assert w._control.start_btn.isEnabled(), "Start must be re-enabled after crawl completes"
+    assert w._control.start_btn.isEnabled(), (
+        "Start must be re-enabled after crawl completes"
+    )
     assert not w._control.stop_btn.isEnabled()
 
 
@@ -519,7 +560,11 @@ def test_main_window_terminal_event_populates_tables(qapp):
     ctrl.refresh_results.return_value = done_state
 
     w._on_start("https://example.com/", 100, 10, True)
-    w._on_progress(_progress_event(kind=CrawlProgressEventKind.CRAWL_COMPLETED, status=CrawlStatus.COMPLETED))
+    w._on_progress(
+        _progress_event(
+            kind=CrawlProgressEventKind.CRAWL_COMPLETED, status=CrawlStatus.COMPLETED
+        )
+    )
 
     assert w._pages._table.rowCount() == 2
     assert w._issues._table.rowCount() == 2
@@ -534,7 +579,11 @@ def test_main_window_terminal_event_enables_export(qapp):
     w._on_start("https://example.com/", 100, 10, True)
     assert not w._control.export_pages_btn.isEnabled()
 
-    w._on_progress(_progress_event(kind=CrawlProgressEventKind.CRAWL_COMPLETED, status=CrawlStatus.COMPLETED))
+    w._on_progress(
+        _progress_event(
+            kind=CrawlProgressEventKind.CRAWL_COMPLETED, status=CrawlStatus.COMPLETED
+        )
+    )
     assert w._control.export_pages_btn.isEnabled()
 
 
@@ -566,7 +615,9 @@ def test_main_window_export_pages_success(qapp, tmp_path):
     path = str(tmp_path / "pages.csv")
     done_state = _fake_desktop_state(selected_crawl_id=_page_id("crawl-1"))
     w, ctrl, _, _ = _make_window(qapp, state=done_state)
-    ctrl.export_pages.return_value = ApplicationResult.ok(ExportStatus(success=True, row_count=3))
+    ctrl.export_pages.return_value = ApplicationResult.ok(
+        ExportStatus(success=True, row_count=3)
+    )
     w._on_export_pages(path)
     assert f"Pages exported → {path}" == w._status_label.text()
 
@@ -578,7 +629,9 @@ def test_main_window_export_pages_failure_shows_error(qapp, tmp_path):
         last_error="Export failed: permission denied",
     )
     w, ctrl, _, _ = _make_window(qapp, state=err_state)
-    ctrl.export_pages.return_value = ApplicationResult.fail("permission denied", "export.failed")
+    ctrl.export_pages.return_value = ApplicationResult.fail(
+        "permission denied", "export.failed"
+    )
     ctrl.state = err_state
     w._on_export_pages(path)
     assert "red" in w._status_label.styleSheet()
@@ -586,9 +639,15 @@ def test_main_window_export_pages_failure_shows_error(qapp, tmp_path):
 
 def test_main_window_crawl_failed_event_re_enables_start(qapp):
     w, ctrl, _, _ = _make_window(qapp)
-    ctrl.refresh_results.return_value = _fake_desktop_state(selected_crawl_id=_page_id("crawl-1"))
+    ctrl.refresh_results.return_value = _fake_desktop_state(
+        selected_crawl_id=_page_id("crawl-1")
+    )
     w._on_start("https://example.com/", 100, 10, True)
-    w._on_progress(_progress_event(kind=CrawlProgressEventKind.CRAWL_FAILED, status=CrawlStatus.FAILED))
+    w._on_progress(
+        _progress_event(
+            kind=CrawlProgressEventKind.CRAWL_FAILED, status=CrawlStatus.FAILED
+        )
+    )
     assert w._control.start_btn.isEnabled()
 
 

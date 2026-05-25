@@ -1,6 +1,13 @@
 """Application service layer for xseo."""
 
-from xseo.application.commands import ExportCommand, PageDetailQuery, QueryOptions, ResultQuery, StartCrawlCommand, StopCrawlCommand
+from xseo.application.commands import (
+    ExportCommand,
+    PageDetailQuery,
+    QueryOptions,
+    ResultQuery,
+    StartCrawlCommand,
+    StopCrawlCommand,
+)
 from xseo.application.events import CrawlProgressEvent, CrawlProgressEventKind
 from xseo.application.query import apply_query_options, validate_query_options
 from xseo.application.read_models import (

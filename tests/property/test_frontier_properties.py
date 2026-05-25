@@ -25,7 +25,11 @@ def test_frontier_preserves_queue_uniqueness(urls):
     added = 0
     for raw in urls:
         normalized = normalizer.normalize(raw)
-        if normalized.ok and frontier.add(normalized.value, depth=1).status == FrontierAddStatus.ADDED:
+        if (
+            normalized.ok
+            and frontier.add(normalized.value, depth=1).status
+            == FrontierAddStatus.ADDED
+        ):
             added += 1
 
     snapshot = frontier.snapshot()

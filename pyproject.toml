@@ -29,7 +29,25 @@ test = [
   "hypothesis>=6",
   "pytest-qt>=4",
 ]
+dev = [
+  "ruff>=0.6",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+# The formatter owns line length; E501 only fires on lines it can't wrap
+# (long strings, URLs, expressions), so leave those to the formatter.
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Imports are intentionally placed after runtime setup (Qt platform, sys.path).
+"tests/smoke/test_ui_smoke.py" = ["E402"]
+"tests/strategies/domain.py" = ["E402"]

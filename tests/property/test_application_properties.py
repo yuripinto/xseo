@@ -3,7 +3,13 @@ from datetime import UTC, datetime
 from hypothesis import given
 from hypothesis import strategies as st
 
-from tests.strategies.domain import crawl_ids, crawl_progress_events, page_rows, query_options, stop_request_counts
+from tests.strategies.domain import (
+    crawl_ids,
+    crawl_progress_events,
+    page_rows,
+    query_options,
+    stop_request_counts,
+)
 from xseo.application.events import CrawlProgressEvent, CrawlProgressEventKind
 from xseo.application.query import apply_query_options
 from xseo.application.services import ActiveCrawlRegistry, EventDeliveryService
@@ -42,7 +48,9 @@ def test_event_delivery_preserves_publish_order(crawl_id, messages):
 def test_unsubscribe_is_idempotent(event):
     service = EventDeliveryService()
     delivered = []
-    subscription = service.subscribe(event.crawl_id, lambda delivered_event: delivered.append(delivered_event)).value
+    subscription = service.subscribe(
+        event.crawl_id, lambda delivered_event: delivered.append(delivered_event)
+    ).value
 
     assert service.unsubscribe(subscription.subscription_id).success
     assert service.unsubscribe(subscription.subscription_id).success

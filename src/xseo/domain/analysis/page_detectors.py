@@ -85,7 +85,11 @@ def detect_page_issues(
             )
         )
 
-    h1s = tuple(heading for heading in headings if heading.page_id == page.page_id and heading.level == HeadingLevel.H1)
+    h1s = tuple(
+        heading
+        for heading in headings
+        if heading.page_id == page.page_id and heading.level == HeadingLevel.H1
+    )
     if not h1s:
         issues.append(
             build_issue(

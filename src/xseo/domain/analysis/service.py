@@ -9,7 +9,9 @@ from xseo.domain.analysis.policies import DEFAULT_SEVERITY_POLICY, DEFAULT_THRES
 
 
 class IssueAnalysisService:
-    def __init__(self, thresholds=DEFAULT_THRESHOLDS, severity_policy=DEFAULT_SEVERITY_POLICY):
+    def __init__(
+        self, thresholds=DEFAULT_THRESHOLDS, severity_policy=DEFAULT_SEVERITY_POLICY
+    ):
         self.thresholds = thresholds
         self.severity_policy = severity_policy
 

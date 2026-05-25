@@ -27,7 +27,9 @@ class ExportApplicationService:
             return self.export_pages(command)
         if command.kind == ExportKind.ISSUES:
             return self.export_issues(command)
-        return ApplicationResult.fail("Export kind is not supported", "export.unsupported_kind")
+        return ApplicationResult.fail(
+            "Export kind is not supported", "export.unsupported_kind"
+        )
 
     def _write(self, command, rows, writer):
         try:

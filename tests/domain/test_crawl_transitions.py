@@ -35,7 +35,9 @@ def test_invalid_transition_returns_validation_failure():
 def test_running_crawl_can_fail():
     crawl = _crawl().start(datetime(2026, 1, 1, tzinfo=UTC)).value
 
-    result = crawl.fail(DomainError.of("x", "failed"), datetime(2026, 1, 1, 0, 2, tzinfo=UTC))
+    result = crawl.fail(
+        DomainError.of("x", "failed"), datetime(2026, 1, 1, 0, 2, tzinfo=UTC)
+    )
 
     assert result.ok
     assert result.value.status == CrawlStatus.FAILED

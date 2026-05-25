@@ -9,11 +9,12 @@ from xseo.domain.ids import CrawlId, PageId
 from xseo.domain.urls import BaseUrl, NormalizedUrl, RawUrl
 from xseo.domain.value_objects import ContentHash, WordCount
 
-
 non_empty_text = st.text(min_size=1).filter(lambda value: bool(value.strip()))
 http_hosts = st.from_regex(r"[a-z]{1,12}\.example\.com", fullmatch=True)
 http_urls = st.builds(lambda host: f"https://{host}/", http_hosts)
-invalid_urls = st.one_of(st.just(""), st.just("ftp://example.com"), st.just("https:///missing"))
+invalid_urls = st.one_of(
+    st.just(""), st.just("ftp://example.com"), st.just("https:///missing")
+)
 
 
 def valid_url_strings(host=None):
@@ -32,7 +33,15 @@ def valid_url_strings(host=None):
         st.integers(min_value=0, max_value=100).map(lambda value: f"?q={value}"),
     )
     fragment = st.one_of(st.just(""), st.just("#section"))
-    return st.builds(lambda host_value, path_value, query_value, frag: f"https://{host_value}{path_value}{query_value}{frag}", host_strategy, path, query, fragment)
+    return st.builds(
+        lambda host_value, path_value, query_value, frag: (
+            f"https://{host_value}{path_value}{query_value}{frag}"
+        ),
+        host_strategy,
+        path,
+        query,
+        fragment,
+    )
 
 
 def same_host_url_sequences():
@@ -52,9 +61,11 @@ def html_documents_with_links():
         max_size=10,
     )
     return hrefs.map(
-        lambda values: "<html><body>"
-        + "".join(f'<a href="{href}">link</a>' for href in values)
-        + "</body></html>"
+        lambda values: (
+            "<html><body>"
+            + "".join(f'<a href="{href}">link</a>' for href in values)
+            + "</body></html>"
+        )
     )
 
 
@@ -150,7 +161,9 @@ def content_hashes(draw):
 
 @st.composite
 def word_counts(draw, min_value=0, max_value=1000):
-    return WordCount.create(draw(st.integers(min_value=min_value, max_value=max_value))).value
+    return WordCount.create(
+        draw(st.integers(min_value=min_value, max_value=max_value))
+    ).value
 
 
 @st.composite
@@ -224,7 +237,9 @@ def page_rows(draw):
 query_options = st.builds(
     QueryOptions,
     filters=st.just(None),
-    sort_field=st.one_of(st.none(), st.sampled_from(("url", "status_code", "title", "word_count"))),
+    sort_field=st.one_of(
+        st.none(), st.sampled_from(("url", "status_code", "title", "word_count"))
+    ),
     sort_direction=st.sampled_from(("asc", "desc")),
     page_size=st.one_of(st.none(), st.integers(min_value=1, max_value=25)),
     offset=st.integers(min_value=0, max_value=10),

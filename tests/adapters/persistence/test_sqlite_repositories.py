@@ -9,8 +9,25 @@ from xseo.adapters.persistence import (
     SQLiteResultsReadRepository,
 )
 from xseo.application.commands import PageDetailQuery, QueryOptions, ResultQuery
-from xseo.domain.entities import Crawl, CrawlConfig, DuplicateGroup, ExportResult, ExtractedPage, Heading, Issue, PageLink, Redirect
-from xseo.domain.enums import CrawlStatus, ExportKind, HeadingLevel, IssueSeverity, IssueType, LinkRelation
+from xseo.domain.entities import (
+    Crawl,
+    CrawlConfig,
+    DuplicateGroup,
+    ExportResult,
+    ExtractedPage,
+    Heading,
+    Issue,
+    PageLink,
+    Redirect,
+)
+from xseo.domain.enums import (
+    CrawlStatus,
+    ExportKind,
+    HeadingLevel,
+    IssueSeverity,
+    IssueType,
+    LinkRelation,
+)
 from xseo.domain.ids import CrawlId, DuplicateGroupId, ExportId, IssueId, PageId
 from xseo.domain.urls import BaseUrl, NormalizedUrl
 from xseo.domain.value_objects import ContentHash, FilePath, WordCount
@@ -31,7 +48,12 @@ def url(value):
 def crawl(crawl_id=None, created_at=None):
     crawl_id = crawl_id or id_(CrawlId, "crawl-1")
     config = CrawlConfig.create(BaseUrl.create("https://example.com/").value).value
-    return Crawl(crawl_id, config, CrawlStatus.CREATED, created_at or datetime(2026, 1, 1, tzinfo=UTC))
+    return Crawl(
+        crawl_id,
+        config,
+        CrawlStatus.CREATED,
+        created_at or datetime(2026, 1, 1, tzinfo=UTC),
+    )
 
 
 def page(crawl_id=None, page_id=None, path="page"):
@@ -84,16 +106,25 @@ def test_page_related_data_and_detail_round_trip():
     data_repo = SQLiteCrawlDataRepository(conn)
     read_repo = SQLiteResultsReadRepository(conn)
     saved_page = page()
-    link = PageLink(saved_page.page_id, url("https://example.com/target"), LinkRelation.INTERNAL, "target")
+    link = PageLink(
+        saved_page.page_id,
+        url("https://example.com/target"),
+        LinkRelation.INTERNAL,
+        "target",
+    )
     heading = Heading(saved_page.page_id, HeadingLevel.H1, "Heading", 1)
-    redirect = Redirect(saved_page.crawl_id, url("https://example.com/old"), saved_page.url, 301)
+    redirect = Redirect(
+        saved_page.crawl_id, url("https://example.com/old"), saved_page.url, 301
+    )
 
     data_repo.save_page(saved_page)
     data_repo.save_links(saved_page.page_id, (link,))
     data_repo.save_headings(saved_page.page_id, (heading,))
     data_repo.save_redirect(redirect)
 
-    detail = read_repo.get_page_detail(PageDetailQuery(saved_page.crawl_id, saved_page.page_id))
+    detail = read_repo.get_page_detail(
+        PageDetailQuery(saved_page.crawl_id, saved_page.page_id)
+    )
 
     assert detail.page.page_id == saved_page.page_id
     assert detail.headings == (heading,)
@@ -133,8 +164,12 @@ def test_issue_and_duplicate_group_reads_are_deterministic():
     analysis_repo.save_issues(saved_crawl.crawl_id, (issue,))
     analysis_repo.save_duplicate_groups(saved_crawl.crawl_id, (group,))
 
-    issues = read_repo.list_issues(ResultQuery(saved_crawl.crawl_id, QueryOptions(sort_field="issue_type")))
-    groups = read_repo.list_duplicate_groups(ResultQuery(saved_crawl.crawl_id, QueryOptions(sort_field="content_hash")))
+    issues = read_repo.list_issues(
+        ResultQuery(saved_crawl.crawl_id, QueryOptions(sort_field="issue_type"))
+    )
+    groups = read_repo.list_duplicate_groups(
+        ResultQuery(saved_crawl.crawl_id, QueryOptions(sort_field="content_hash"))
+    )
 
     assert issues[0].issue_id == issue.issue_id
     assert groups[0].page_count == 2

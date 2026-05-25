@@ -40,7 +40,9 @@ class FakeFetch:
         self.requested.append(url)
         if self.outcomes:
             return self.outcomes.pop(0)
-        return FetchResult(url, url, FetchStatus.SUCCESS, status_code=200, content_type="text/html")
+        return FetchResult(
+            url, url, FetchStatus.SUCCESS, status_code=200, content_type="text/html"
+        )
 
 
 class FakeDiscovery:
@@ -88,7 +90,9 @@ def _fetch_result(url="https://example.com/"):
 
 
 def test_crawl_engine_stops_at_successful_page_limit():
-    fetch = FakeFetch([_fetch_result("https://example.com/"), _fetch_result("https://example.com/a")])
+    fetch = FakeFetch(
+        [_fetch_result("https://example.com/"), _fetch_result("https://example.com/a")]
+    )
     engine = UrlCrawlEngine(
         fetch,
         FakePublisher(),

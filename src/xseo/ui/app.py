@@ -7,7 +7,6 @@ import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 
-from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
@@ -17,6 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from xseo.adapters.background import ThreadedBackgroundExecution
 from xseo.adapters.crawl_processor import PageProcessorLinkDiscovery
 from xseo.adapters.event_bridge import DomainToAppEventBridge
 from xseo.adapters.export import CsvExportAdapter
@@ -44,7 +44,6 @@ from xseo.application.services.active_crawls import ActiveCrawlRegistry
 from xseo.application.services.crawl_execution import CrawlExecutionCoordinator
 from xseo.application.services.crawl_service import CrawlApplicationService
 from xseo.application.services.event_delivery import EventDeliveryService
-from xseo.adapters.background import ThreadedBackgroundExecution
 from xseo.domain.analysis import IssueAnalysisService
 from xseo.domain.crawler import UrlCrawlEngine
 from xseo.domain.duplicates import detect_duplicate_groups
@@ -205,7 +204,9 @@ class MainWindow(QMainWindow):
             self._set_status("Could not restore recent crawl", error=True)
             traceback.print_exc()
 
-    def _on_start(self, url: str, page_limit: int, timeout: int, same_host: bool) -> None:
+    def _on_start(
+        self, url: str, page_limit: int, timeout: int, same_host: bool
+    ) -> None:
         try:
             self._progress.reset()
             request_delay = self._control.request_delay.value()
@@ -251,12 +252,16 @@ class MainWindow(QMainWindow):
         try:
             state = self._controller.refresh_results()
             self._sync_tables(state)
-            self._control.set_export_enabled(self._controller.state.selected_crawl_id is not None)
+            self._control.set_export_enabled(
+                self._controller.state.selected_crawl_id is not None
+            )
             pages = len(state.pages)
             issues = len(state.issues)
             dups = len(state.duplicate_groups)
             self._progress.set_counts(pages=pages, issues=issues, dups=dups)
-            self._set_status(f"Crawl complete — {pages} pages, {issues} issues, {dups} duplicate groups")
+            self._set_status(
+                f"Crawl complete — {pages} pages, {issues} issues, {dups} duplicate groups"
+            )
         except Exception as exc:
             self._set_status(str(exc), error=True)
             traceback.print_exc()

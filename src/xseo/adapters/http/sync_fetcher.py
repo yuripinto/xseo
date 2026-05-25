@@ -23,4 +23,6 @@ class SyncHttpFetchAdapter:
 
     async def _fetch_async(self, url: object, crawl_id: object) -> object:
         async with httpx.AsyncClient(follow_redirects=True) as client:
-            return await HttpxFetchAdapter(client, self.max_body_bytes).fetch(url, crawl_id=crawl_id)
+            return await HttpxFetchAdapter(client, self.max_body_bytes).fetch(
+                url, crawl_id=crawl_id
+            )

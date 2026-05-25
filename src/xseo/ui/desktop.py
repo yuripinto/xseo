@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from xseo.application.commands import ExportCommand, ResultQuery, StartCrawlCommand, StopCrawlCommand
+from xseo.application.commands import (
+    ExportCommand,
+    ResultQuery,
+    StartCrawlCommand,
+    StopCrawlCommand,
+)
 from xseo.domain.enums import ExportKind
 
 
@@ -64,9 +69,14 @@ class XseoDesktopController:
         if self.state.selected_crawl_id is None:
             self.state = _replace(self.state, last_error="No crawl selected")
             return None
-        result = self.crawl_service.request_stop(StopCrawlCommand(self.state.selected_crawl_id))
+        result = self.crawl_service.request_stop(
+            StopCrawlCommand(self.state.selected_crawl_id)
+        )
         if result.success:
-            self.state = _replace(self.state, crawl_status=getattr(result.value, "status", self.state.crawl_status))
+            self.state = _replace(
+                self.state,
+                crawl_status=getattr(result.value, "status", self.state.crawl_status),
+            )
         else:
             self.state = _replace(self.state, last_error=result.message)
         return result
@@ -101,14 +111,20 @@ class XseoDesktopController:
 
     def _export(self, kind, target_path):
         if self.export_service is None:
-            self.state = _replace(self.state, last_error="Export service is not configured")
+            self.state = _replace(
+                self.state, last_error="Export service is not configured"
+            )
             return None
         if self.state.selected_crawl_id is None:
             self.state = _replace(self.state, last_error="No crawl selected")
             return None
-        result = self.export_service.export(ExportCommand(self.state.selected_crawl_id, kind, target_path))
+        result = self.export_service.export(
+            ExportCommand(self.state.selected_crawl_id, kind, target_path)
+        )
         if result.success:
-            self.state = _replace(self.state, export_status=result.value, last_error=None)
+            self.state = _replace(
+                self.state, export_status=result.value, last_error=None
+            )
         else:
             self.state = _replace(self.state, last_error=result.message)
         return result

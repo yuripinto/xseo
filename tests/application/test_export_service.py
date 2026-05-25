@@ -56,7 +56,9 @@ def test_export_service_calls_export_port_and_saves_metadata():
     export_port = ExportPort()
     export_repository = ExportRepository()
     service = ExportApplicationService(ReadRepository(), export_port, export_repository)
-    command = ExportCommand(_id(CrawlId, "crawl-1"), ExportKind.ISSUES, Path("issues.csv"))
+    command = ExportCommand(
+        _id(CrawlId, "crawl-1"), ExportKind.ISSUES, Path("issues.csv")
+    )
 
     result = service.export(command)
 

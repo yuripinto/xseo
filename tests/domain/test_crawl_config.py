@@ -40,7 +40,9 @@ def test_crawl_config_rejects_negative_request_delay():
 def test_crawl_config_accepts_zero_request_delay():
     base_url = BaseUrl.create("https://example.com").value
 
-    result = CrawlConfig.create(base_url, request_delay_seconds=0.0, respect_robots=False)
+    result = CrawlConfig.create(
+        base_url, request_delay_seconds=0.0, respect_robots=False
+    )
 
     assert result.ok
     assert result.value.request_delay_seconds == 0.0

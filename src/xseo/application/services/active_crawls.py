@@ -23,7 +23,9 @@ class ActiveCrawlRegistry:
     def register(self, crawl_id, control_handle, status=None):
         key = _key(crawl_id)
         if key in self._active and not self._active[key].terminal:
-            return ApplicationResult.fail("Crawl is already active", "crawl.already_active", self._active[key])
+            return ApplicationResult.fail(
+                "Crawl is already active", "crawl.already_active", self._active[key]
+            )
         active = ActiveCrawl(crawl_id, control_handle, status=status)
         self._active[key] = active
         return ApplicationResult.ok(active)
@@ -39,7 +41,9 @@ class ActiveCrawlRegistry:
             active.control_handle.request_stop()
         elif hasattr(active.control_handle, "stop"):
             active.control_handle.stop()
-        active = ActiveCrawl(active.crawl_id, active.control_handle, active.status, active.terminal, True)
+        active = ActiveCrawl(
+            active.crawl_id, active.control_handle, active.status, active.terminal, True
+        )
         self._active[key] = active
         return ApplicationResult.ok(active)
 
@@ -49,7 +53,13 @@ class ActiveCrawlRegistry:
         if active is None:
             active = ActiveCrawl(crawl_id, None, status=status, terminal=True)
         else:
-            active = ActiveCrawl(active.crawl_id, active.control_handle, status or active.status, True, active.stop_requested)
+            active = ActiveCrawl(
+                active.crawl_id,
+                active.control_handle,
+                status or active.status,
+                True,
+                active.stop_requested,
+            )
         self._active[key] = active
         return ApplicationResult.ok(active)
 
