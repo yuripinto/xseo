@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -45,12 +46,18 @@ class UrlCrawlEngine:
         clock,
         normalizer=None,
         link_discovery=None,
+        robots_policy=None,
+        request_delay_seconds=0.0,
+        sleeper=None,
     ):
         self.fetch_port = fetch_port
         self.event_publisher = event_publisher
         self.clock = clock
         self.normalizer = normalizer or UrlNormalizer()
         self.link_discovery = link_discovery
+        self.robots_policy = robots_policy
+        self.request_delay_seconds = request_delay_seconds
+        self.sleeper = sleeper or time.sleep
 
     def run(self, crawl: Crawl, stop_token=None):
         stop_token = stop_token or NeverStopToken()
@@ -64,14 +71,17 @@ class UrlCrawlEngine:
         crawl = running_result.value
 
         frontier = UrlFrontier(start_result.value)
-        frontier.add(start_result.value, depth=0)
+        start_allowed = self._robots_allows(start_result.value)
+        if start_allowed:
+            frontier.add(start_result.value, depth=0)
 
         publish_error = self._publish(CrawlStarted(crawl.crawl_id, self.clock.now(), crawl.config))
         if publish_error:
             return self._fail_running_crawl(crawl, frontier, 0, publish_error)
-        publish_error = self._publish(UrlQueued(crawl.crawl_id, self.clock.now(), start_result.value))
-        if publish_error:
-            return self._fail_running_crawl(crawl, frontier, 0, publish_error)
+        if start_allowed:
+            publish_error = self._publish(UrlQueued(crawl.crawl_id, self.clock.now(), start_result.value))
+            if publish_error:
+                return self._fail_running_crawl(crawl, frontier, 0, publish_error)
 
         attempted = 0
         while frontier.successful_page_count < crawl.config.page_limit:
@@ -81,6 +91,9 @@ class UrlCrawlEngine:
             entry = frontier.next_url()
             if entry is None:
                 return self._completed_result(crawl, frontier, attempted)
+
+            if self.request_delay_seconds > 0 and attempted > 0:
+                self.sleeper(self.request_delay_seconds)
 
             fetch_result = self.fetch_port.fetch(entry.url)
             attempted += 1
@@ -121,9 +134,19 @@ class UrlCrawlEngine:
             normalized = self.normalizer.normalize_discovered(href, entry.url)
             if not normalized.ok:
                 continue
+            if not self._robots_allows(normalized.value):
+                continue
             add_result = frontier.add(normalized.value, entry.depth + 1)
             if add_result.added:
                 self._publish(UrlQueued(crawl.crawl_id, self.clock.now(), normalized.value))
+
+    def _robots_allows(self, url):
+        if self.robots_policy is None:
+            return True
+        try:
+            return self.robots_policy.is_allowed(url)
+        except Exception:
+            return True
 
     def _is_html_success(self, fetch_result):
         content_type = (fetch_result.content_type or "").lower()

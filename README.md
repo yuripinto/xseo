@@ -13,6 +13,7 @@
 ## Features
 
 - **Live crawling** with a real-time progress view and a threaded background worker that keeps the UI responsive.
+- **Polite by default** — respects `robots.txt` and applies a configurable per-request delay so you don't hammer the sites you audit.
 - **On-page extraction** of titles, meta descriptions, headings, canonicals, robots directives, internal/external links, and more via `selectolax`.
 - **Issue detection** for missing/duplicate titles and descriptions, thin content, heading problems, broken links, and other common SEO defects.
 - **Duplicate content detection** through content hashing and grouped read models.
@@ -79,7 +80,7 @@ python3 -m compileall src tests
 python3 -m pytest -q
 ```
 
-The current suite has 104 tests covering domain logic, adapters, integration, property-based invariants, and UI smoke tests.
+The current suite has 145 tests covering domain logic, adapters, integration, property-based invariants, and UI smoke tests.
 
 ## Project layout
 

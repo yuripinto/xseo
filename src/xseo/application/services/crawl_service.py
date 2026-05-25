@@ -40,6 +40,8 @@ class CrawlApplicationService:
             same_host_only=command.same_host_only,
             page_limit=command.page_limit,
             timeout_seconds=command.timeout_seconds,
+            request_delay_seconds=command.request_delay_seconds,
+            respect_robots=command.respect_robots,
         )
         if not config.ok:
             return ApplicationResult.fail(config.first_error.message, str(config.first_error.code))

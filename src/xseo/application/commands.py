@@ -14,6 +14,8 @@ class StartCrawlCommand:
     same_host_only: bool = True
     page_limit: int = 1000
     timeout_seconds: int = 10
+    request_delay_seconds: float = 0.5
+    respect_robots: bool = True
 
 
 @dataclass(frozen=True)

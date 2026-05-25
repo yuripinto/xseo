@@ -20,6 +20,7 @@ class UrlErrorCode(StrEnum):
 class CrawlConfigErrorCode(StrEnum):
     INVALID_PAGE_LIMIT = "crawl_config.invalid_page_limit"
     INVALID_TIMEOUT = "crawl_config.invalid_timeout"
+    INVALID_REQUEST_DELAY = "crawl_config.invalid_request_delay"
 
 
 class CrawlStateErrorCode(StrEnum):
