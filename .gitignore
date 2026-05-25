@@ -35,5 +35,5 @@ htmlcov/
 !.github/
 
 # Project-specific
-*docs*
+*-docs/
 *.csv

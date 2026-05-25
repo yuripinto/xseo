@@ -8,6 +8,8 @@
 
 `xseo` is a desktop application that crawls a website, extracts on-page SEO signals, detects common issues and content duplication, and renders the results in a clean UI. Everything runs locally and persists to a single SQLite file under `~/.xseo/`.
 
+![xseo issues view](docs/images/04-issues.png)
+
 ## Features
 
 - **Live crawling** with a real-time progress view and a threaded background worker that keeps the UI responsive.
@@ -18,6 +20,24 @@
 - **CSV export** for every result view, so you can pipe findings into spreadsheets or other tools.
 - **Local persistence** in SQLite at `~/.xseo/xseo.sqlite3`. The last crawl is restored automatically on launch.
 - **Clean architecture** — domain, application, and adapter layers are strictly separated, with ports/adapters for HTTP, persistence, export, and the UI.
+
+## Screenshots
+
+Configure a crawl, then watch progress stream in live:
+
+| Control | Progress |
+| --- | --- |
+| ![Control panel](docs/images/01-control.png) | ![Live progress](docs/images/02-progress.png) |
+
+Review crawled pages, detected issues, and duplicate content groups:
+
+| Pages | Duplicates |
+| --- | --- |
+| ![Pages table](docs/images/03-pages.png) | ![Duplicate groups](docs/images/05-duplicates.png) |
+
+Double-click any page for full detail — headings, links, redirects, and per-page issues:
+
+![Page detail dialog](docs/images/06-page-detail.png)
 
 ## Tech stack
 
