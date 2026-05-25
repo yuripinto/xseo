@@ -96,6 +96,10 @@ src/xseo/
 └── ui/             # PySide6 app, widgets, controller
 ```
 
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, how to run the checks (`ruff` + `pytest`), and the project conventions.
+
 ## About
 
 I built `xseo` because I needed it. I was starting a new project and wanted a fast way to scan it for SEO issues without uploading URLs to a third-party tool, paying for another subscription, or fighting a heavy web dashboard. I wanted something that ran on my desktop, was honest about what it found, and stored results in a file I owned — so I wrote it, and I'm sharing it in case it's useful to anyone else who wants a small, local, hackable SEO crawler.
