@@ -27,10 +27,25 @@ class XseoDesktopController:
         self.export_service = export_service
         self.state = state or DesktopState()
 
-    def start_crawl(self, start_url, same_host_only=True, page_limit=1000, timeout_seconds=10):
+    def start_crawl(
+        self,
+        start_url,
+        same_host_only=True,
+        page_limit=1000,
+        timeout_seconds=10,
+        request_delay_seconds=0.5,
+        respect_robots=True,
+    ):
         self.state = _replace(self.state, busy=True, last_error=None)
         result = self.crawl_service.start_crawl(
-            StartCrawlCommand(start_url, same_host_only, page_limit, timeout_seconds)
+            StartCrawlCommand(
+                start_url,
+                same_host_only,
+                page_limit,
+                timeout_seconds,
+                request_delay_seconds,
+                respect_robots,
+            )
         )
         if not result.success:
             self.state = _replace(self.state, busy=False, last_error=result.message)

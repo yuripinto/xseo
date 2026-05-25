@@ -51,6 +51,14 @@ class FakeDiscovery:
         return self.links
 
 
+class FakeRobots:
+    def __init__(self, disallowed):
+        self.disallowed = set(disallowed)
+
+    def is_allowed(self, url):
+        return getattr(url, "value", url) not in self.disallowed
+
+
 class StopAfterChecks:
     def __init__(self, stop_at):
         self.stop_at = stop_at
@@ -123,3 +131,54 @@ def test_crawl_engine_publishes_failed_event_when_progress_publish_fails():
 
     assert result.final_status == CrawlStatus.FAILED
     assert isinstance(publisher.events[-1], CrawlFailed)
+
+
+def test_robots_disallows_start_url_skips_all_fetching():
+    fetch = FakeFetch([])
+    robots = FakeRobots(disallowed={"https://example.com/"})
+    engine = UrlCrawlEngine(fetch, FakePublisher(), FakeClock(), robots_policy=robots)
+
+    result = engine.run(_crawl())
+
+    assert result.final_status == CrawlStatus.COMPLETED
+    assert result.successful_page_count == 0
+    assert fetch.requested == []
+
+
+def test_robots_disallows_discovered_link():
+    fetch = FakeFetch(
+        [_fetch_result("https://example.com/"), _fetch_result("https://example.com/b")]
+    )
+    robots = FakeRobots(disallowed={"https://example.com/a"})
+    engine = UrlCrawlEngine(
+        fetch,
+        FakePublisher(),
+        FakeClock(),
+        link_discovery=FakeDiscovery(["/a", "/b"]),
+        robots_policy=robots,
+    )
+
+    engine.run(_crawl(limit=10))
+
+    requested = [url.value for url in fetch.requested]
+    assert "https://example.com/a" not in requested
+    assert "https://example.com/b" in requested
+
+
+def test_request_delay_sleeps_between_fetches():
+    sleeps = []
+    fetch = FakeFetch(
+        [_fetch_result("https://example.com/"), _fetch_result("https://example.com/a")]
+    )
+    engine = UrlCrawlEngine(
+        fetch,
+        FakePublisher(),
+        FakeClock(),
+        link_discovery=FakeDiscovery(["/a"]),
+        request_delay_seconds=0.25,
+        sleeper=sleeps.append,
+    )
+
+    engine.run(_crawl(limit=2))
+
+    assert sleeps == [0.25]

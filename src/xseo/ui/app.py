@@ -20,7 +20,12 @@ from PySide6.QtWidgets import (
 from xseo.adapters.crawl_processor import PageProcessorLinkDiscovery
 from xseo.adapters.event_bridge import DomainToAppEventBridge
 from xseo.adapters.export import CsvExportAdapter
-from xseo.adapters.http import SyncHttpFetchAdapter
+from xseo.adapters.http import (
+    AllowAllRobotsPolicy,
+    RobotsTxtPolicy,
+    SyncHttpFetchAdapter,
+    httpx_robots_fetcher,
+)
 from xseo.adapters.persistence import (
     SQLiteAnalysisRepository,
     SQLiteCrawlDataRepository,
@@ -86,11 +91,19 @@ def build_services(
         processor = PageProcessorLinkDiscovery(
             SeoExtractionPipeline(), data_repo, crawl.crawl_id
         )
+        if crawl.config.respect_robots:
+            robots_policy = RobotsTxtPolicy(
+                httpx_robots_fetcher(crawl.config.timeout_seconds)
+            )
+        else:
+            robots_policy = AllowAllRobotsPolicy()
         engine = UrlCrawlEngine(
             fetch_port=SyncHttpFetchAdapter(),
             event_publisher=bridge,
             clock=clock,
             link_discovery=processor,
+            robots_policy=robots_policy,
+            request_delay_seconds=crawl.config.request_delay_seconds,
         )
         coordinator = CrawlExecutionCoordinator(
             crawl_engine=engine,
@@ -195,7 +208,11 @@ class MainWindow(QMainWindow):
     def _on_start(self, url: str, page_limit: int, timeout: int, same_host: bool) -> None:
         try:
             self._progress.reset()
-            result = self._controller.start_crawl(url, same_host, page_limit, timeout)
+            request_delay = self._control.request_delay.value()
+            respect_robots = self._control.respect_robots.isChecked()
+            result = self._controller.start_crawl(
+                url, same_host, page_limit, timeout, request_delay, respect_robots
+            )
             if not result.success:
                 self._set_status(result.message or "Crawl failed to start", error=True)
                 return

@@ -5,6 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QCheckBox,
+    QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
     QGroupBox,
@@ -50,9 +51,21 @@ class ControlPanel(QWidget):
         self.timeout.setSuffix(" s")
         form.addRow("Timeout:", self.timeout)
 
+        self.request_delay = QDoubleSpinBox()
+        self.request_delay.setRange(0.0, 60.0)
+        self.request_delay.setSingleStep(0.1)
+        self.request_delay.setDecimals(1)
+        self.request_delay.setValue(0.5)
+        self.request_delay.setSuffix(" s")
+        form.addRow("Request delay:", self.request_delay)
+
         self.same_host = QCheckBox("Same host only")
         self.same_host.setChecked(True)
         form.addRow("", self.same_host)
+
+        self.respect_robots = QCheckBox("Respect robots.txt")
+        self.respect_robots.setChecked(True)
+        form.addRow("", self.respect_robots)
 
         root.addWidget(crawl_group)
 

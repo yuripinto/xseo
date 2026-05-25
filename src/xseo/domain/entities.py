@@ -27,6 +27,8 @@ class CrawlConfig:
     same_host_only: bool = True
     page_limit: int = 1000
     timeout_seconds: int = 10
+    request_delay_seconds: float = 0.5
+    respect_robots: bool = True
 
     @classmethod
     def create(
@@ -35,6 +37,8 @@ class CrawlConfig:
         same_host_only: bool = True,
         page_limit: int = 1000,
         timeout_seconds: int = 10,
+        request_delay_seconds: float = 0.5,
+        respect_robots: bool = True,
     ) -> ValidationResult["CrawlConfig"]:
         errors = []
         if page_limit <= 0:
@@ -51,6 +55,13 @@ class CrawlConfig:
                     "Timeout must be positive",
                 )
             )
+        if request_delay_seconds < 0:
+            errors.append(
+                DomainValidationError.of(
+                    CrawlConfigErrorCode.INVALID_REQUEST_DELAY,
+                    "Request delay must be non-negative",
+                )
+            )
         if errors:
             return ValidationResult.failure(*errors)
         return ValidationResult.success(
@@ -59,6 +70,8 @@ class CrawlConfig:
                 same_host_only=same_host_only,
                 page_limit=page_limit,
                 timeout_seconds=timeout_seconds,
+                request_delay_seconds=request_delay_seconds,
+                respect_robots=respect_robots,
             )
         )
 
