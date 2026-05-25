@@ -1,5 +1,9 @@
 # xseo
 
+[![CI](https://github.com/yuripinto/xseo/actions/workflows/ci.yml/badge.svg)](https://github.com/yuripinto/xseo/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+
 > A local-first desktop SEO crawler. Audit your site on your own machine — no cloud, no accounts, no data leaves your computer.
 
 `xseo` is a desktop application that crawls a website, extracts on-page SEO signals, detects common issues and content duplication, and renders the results in a clean UI. Everything runs locally and persists to a single SQLite file under `~/.xseo/`.
