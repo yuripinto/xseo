@@ -75,11 +75,15 @@ class UrlCrawlEngine:
         if start_allowed:
             frontier.add(start_result.value, depth=0)
 
-        publish_error = self._publish(CrawlStarted(crawl.crawl_id, self.clock.now(), crawl.config))
+        publish_error = self._publish(
+            CrawlStarted(crawl.crawl_id, self.clock.now(), crawl.config)
+        )
         if publish_error:
             return self._fail_running_crawl(crawl, frontier, 0, publish_error)
         if start_allowed:
-            publish_error = self._publish(UrlQueued(crawl.crawl_id, self.clock.now(), start_result.value))
+            publish_error = self._publish(
+                UrlQueued(crawl.crawl_id, self.clock.now(), start_result.value)
+            )
             if publish_error:
                 return self._fail_running_crawl(crawl, frontier, 0, publish_error)
 
@@ -100,7 +104,9 @@ class UrlCrawlEngine:
             if fetch_result.status == FetchStatus.SUCCESS:
                 frontier.mark_visited(entry.url, fetch_result)
             else:
-                frontier.mark_failed(entry.url, fetch_result.error or fetch_result.status.value)
+                frontier.mark_failed(
+                    entry.url, fetch_result.error or fetch_result.status.value
+                )
 
             publish_error = self._publish(
                 PageFetched(
@@ -112,14 +118,18 @@ class UrlCrawlEngine:
                 )
             )
             if publish_error:
-                return self._fail_running_crawl(crawl, frontier, attempted, publish_error)
+                return self._fail_running_crawl(
+                    crawl, frontier, attempted, publish_error
+                )
 
             if self._is_html_success(fetch_result):
                 self._discover_and_queue(crawl, frontier, entry, fetch_result)
 
             publish_error = self._publish_progress(crawl, frontier)
             if publish_error:
-                return self._fail_running_crawl(crawl, frontier, attempted, publish_error)
+                return self._fail_running_crawl(
+                    crawl, frontier, attempted, publish_error
+                )
 
             if stop_token.is_stop_requested():
                 return self._stopped_result(crawl, frontier, attempted)
@@ -138,7 +148,9 @@ class UrlCrawlEngine:
                 continue
             add_result = frontier.add(normalized.value, entry.depth + 1)
             if add_result.added:
-                self._publish(UrlQueued(crawl.crawl_id, self.clock.now(), normalized.value))
+                self._publish(
+                    UrlQueued(crawl.crawl_id, self.clock.now(), normalized.value)
+                )
 
     def _robots_allows(self, url):
         if self.robots_policy is None:
@@ -187,7 +199,11 @@ class UrlCrawlEngine:
     def _stopped_result(self, crawl, frontier, attempted):
         stopping = crawl.request_stop(self.clock.now()).value
         stopped = stopping.mark_stopped(self.clock.now()).value
-        self._publish(CrawlStopped(stopped.crawl_id, self.clock.now(), frontier.successful_page_count, 0))
+        self._publish(
+            CrawlStopped(
+                stopped.crawl_id, self.clock.now(), frontier.successful_page_count, 0
+            )
+        )
         return CrawlRunResult(
             crawl=stopped,
             final_status=stopped.status,

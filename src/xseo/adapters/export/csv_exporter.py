@@ -11,7 +11,6 @@ from xseo.domain.enums import ExportKind
 from xseo.domain.ids import CrawlId, ExportId
 from xseo.domain.value_objects import FilePath
 
-
 PAGE_HEADERS = (
     "page_id",
     "url",
@@ -56,7 +55,9 @@ class CsvExportAdapter:
             writer = csv.DictWriter(handle, fieldnames=headers)
             writer.writeheader()
             for row in row_tuple:
-                writer.writerow({header: _cell(getattr(row, header, None)) for header in headers})
+                writer.writerow(
+                    {header: _cell(getattr(row, header, None)) for header in headers}
+                )
         return ExportResult.create(
             _export_id(kind, self.crawl_id, path, len(row_tuple)),
             self.crawl_id,
@@ -76,4 +77,6 @@ def _cell(value):
 def _export_id(kind, crawl_id, path, row_count):
     crawl_value = getattr(crawl_id, "value", str(crawl_id))
     raw = f"{kind.value}|{crawl_value}|{path}|{row_count}"
-    return ExportId.create("export-" + sha256(raw.encode("utf-8")).hexdigest()[:24]).value
+    return ExportId.create(
+        "export-" + sha256(raw.encode("utf-8")).hexdigest()[:24]
+    ).value

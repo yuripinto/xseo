@@ -16,7 +16,9 @@ class ContentHash:
     def create(cls, value: str) -> ValidationResult["ContentHash"]:
         if not isinstance(value, str) or not value.strip():
             return ValidationResult.failure(
-                DomainValidationError.of("content_hash.empty", "Content hash must be non-empty")
+                DomainValidationError.of(
+                    "content_hash.empty", "Content hash must be non-empty"
+                )
             )
         return ValidationResult.success(cls(value.strip()))
 
@@ -29,7 +31,9 @@ class WordCount:
     def create(cls, value: int) -> ValidationResult["WordCount"]:
         if not isinstance(value, int) or value < 0:
             return ValidationResult.failure(
-                DomainValidationError.of("word_count.invalid", "Word count must be non-negative")
+                DomainValidationError.of(
+                    "word_count.invalid", "Word count must be non-negative"
+                )
             )
         return ValidationResult.success(cls(value))
 
@@ -42,6 +46,8 @@ class FilePath:
     def create(cls, value: str) -> ValidationResult["FilePath"]:
         if not isinstance(value, str) or not value.strip():
             return ValidationResult.failure(
-                DomainValidationError.of(ExportErrorCode.INVALID_ROW_COUNT, "Path must be non-empty")
+                DomainValidationError.of(
+                    ExportErrorCode.INVALID_ROW_COUNT, "Path must be non-empty"
+                )
             )
         return ValidationResult.success(cls(value.strip()))

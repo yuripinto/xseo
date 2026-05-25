@@ -74,7 +74,9 @@ def test_httpx_fetcher_records_redirect_chain_when_crawl_id_is_available():
             return httpx.Response(200, content=b"ok", request=request)
 
         transport = httpx.MockTransport(handler)
-        async with httpx.AsyncClient(transport=transport, follow_redirects=True) as client:
+        async with httpx.AsyncClient(
+            transport=transport, follow_redirects=True
+        ) as client:
             return await HttpxFetchAdapter(client).fetch(
                 _url(),
                 crawl_id=CrawlId.create("crawl-1").value,

@@ -1,10 +1,18 @@
 from hypothesis import given
 from hypothesis import strategies as st
 
-from tests.strategies.domain import html_documents_with_links, malformed_html_fragments, visible_text_variants
+from tests.strategies.domain import (
+    html_documents_with_links,
+    malformed_html_fragments,
+    visible_text_variants,
+)
 from xseo.domain.entities import FetchResult
 from xseo.domain.enums import FetchStatus
-from xseo.domain.extraction import SeoExtractionPipeline, content_hash_for_text, word_count
+from xseo.domain.extraction import (
+    SeoExtractionPipeline,
+    content_hash_for_text,
+    word_count,
+)
 from xseo.domain.ids import CrawlId, PageId
 from xseo.domain.urls import NormalizedUrl
 

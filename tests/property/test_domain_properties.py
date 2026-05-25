@@ -1,6 +1,5 @@
 from dataclasses import FrozenInstanceError
 from datetime import UTC, datetime
-from enum import StrEnum
 
 import pytest
 from hypothesis import given

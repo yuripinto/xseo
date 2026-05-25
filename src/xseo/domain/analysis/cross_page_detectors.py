@@ -20,7 +20,9 @@ def detect_duplicate_title_issues(pages, severity_policy=DEFAULT_SEVERITY_POLICY
     )
 
 
-def detect_duplicate_meta_description_issues(pages, severity_policy=DEFAULT_SEVERITY_POLICY):
+def detect_duplicate_meta_description_issues(
+    pages, severity_policy=DEFAULT_SEVERITY_POLICY
+):
     return _detect_duplicate_text_issues(
         pages,
         lambda page: page.meta_description,
@@ -31,13 +33,14 @@ def detect_duplicate_meta_description_issues(pages, severity_policy=DEFAULT_SEVE
 
 
 def detect_cross_page_issues(pages, severity_policy=DEFAULT_SEVERITY_POLICY):
-    return (
-        detect_duplicate_title_issues(pages, severity_policy)
-        + detect_duplicate_meta_description_issues(pages, severity_policy)
-    )
+    return detect_duplicate_title_issues(
+        pages, severity_policy
+    ) + detect_duplicate_meta_description_issues(pages, severity_policy)
 
 
-def _detect_duplicate_text_issues(pages, accessor, issue_type, explanation, severity_policy):
+def _detect_duplicate_text_issues(
+    pages, accessor, issue_type, explanation, severity_policy
+):
     groups = defaultdict(list)
     for page in pages:
         key = normalize_comparable_text(accessor(page))

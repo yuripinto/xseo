@@ -28,7 +28,9 @@ class CrawlExecutionCoordinator:
 
     def run(self, crawl, stop_token=None):
         if self.crawl_engine is None:
-            return ApplicationResult.fail("Crawl engine is not configured", "crawl.engine_missing")
+            return ApplicationResult.fail(
+                "Crawl engine is not configured", "crawl.engine_missing"
+            )
         try:
             result = self.crawl_engine.run(crawl, stop_token=stop_token)
         except Exception as exc:
@@ -50,7 +52,9 @@ class CrawlExecutionCoordinator:
         headings = getattr(data, "headings", ())
         link_statuses = getattr(data, "link_statuses", ())
         if self.issue_analysis_service is not None:
-            issues = self.issue_analysis_service.detect_issues(crawl_id, pages, headings, link_statuses)
+            issues = self.issue_analysis_service.detect_issues(
+                crawl_id, pages, headings, link_statuses
+            )
             self.analysis_repository.save_issues(crawl_id, issues)
         if self.duplicate_detector is not None:
             groups = self.duplicate_detector(crawl_id, pages)

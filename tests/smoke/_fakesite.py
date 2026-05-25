@@ -96,9 +96,7 @@ class FakeSite:
 
     def __init__(self) -> None:
         self._server = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
-        self._thread = threading.Thread(
-            target=self._server.serve_forever, daemon=True
-        )
+        self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
 
     @property
     def port(self) -> int:

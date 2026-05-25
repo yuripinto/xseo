@@ -1,4 +1,8 @@
-from xseo.domain.extraction import content_hash_for_text, normalize_visible_text, word_count
+from xseo.domain.extraction import (
+    content_hash_for_text,
+    normalize_visible_text,
+    word_count,
+)
 
 
 def test_visible_text_collapses_whitespace():

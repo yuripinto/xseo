@@ -32,7 +32,9 @@ class UrlNormalizer:
         if not scheme:
             return _failure(UrlErrorCode.INVALID, "URL has no scheme")
         if scheme not in _CRAWLABLE_SCHEMES:
-            return _failure(UrlErrorCode.UNSUPPORTED_SCHEME, "URL scheme is unsupported")
+            return _failure(
+                UrlErrorCode.UNSUPPORTED_SCHEME, "URL scheme is unsupported"
+            )
         if not host:
             return _failure(UrlErrorCode.MISSING_HOST, "URL has no host")
 

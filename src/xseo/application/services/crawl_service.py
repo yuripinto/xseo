@@ -34,7 +34,9 @@ class CrawlApplicationService:
     def start_crawl(self, command):
         start_url = BaseUrl.create(command.start_url)
         if not start_url.ok:
-            return ApplicationResult.fail("Start URL is invalid", "crawl.invalid_start_url")
+            return ApplicationResult.fail(
+                "Start URL is invalid", "crawl.invalid_start_url"
+            )
         config = CrawlConfig.create(
             start_url.value,
             same_host_only=command.same_host_only,
@@ -44,18 +46,27 @@ class CrawlApplicationService:
             respect_robots=command.respect_robots,
         )
         if not config.ok:
-            return ApplicationResult.fail(config.first_error.message, str(config.first_error.code))
+            return ApplicationResult.fail(
+                config.first_error.message, str(config.first_error.code)
+            )
 
         crawl_id = self.crawl_id_factory()
         crawl = Crawl.create(crawl_id, config.value, self.clock.now())
         self.crawl_repository.save_crawl(crawl)
-        work = self.work_factory(crawl) if self.work_factory is not None else lambda: None
+        work = (
+            self.work_factory(crawl) if self.work_factory is not None else lambda: None
+        )
         control_handle = self.background_execution.start(crawl_id, work)
         registered = self.active_crawls.register(crawl_id, control_handle, crawl.status)
         if not registered.success:
             return registered
         session = CrawlSession(crawl_id, crawl.status, created_at=crawl.created_at)
-        self._publish(crawl_id, CrawlProgressEventKind.CRAWL_STARTED, session.status, "Crawl started")
+        self._publish(
+            crawl_id,
+            CrawlProgressEventKind.CRAWL_STARTED,
+            session.status,
+            "Crawl started",
+        )
         return ApplicationResult.ok(session)
 
     def request_stop(self, command):
@@ -64,7 +75,12 @@ class CrawlApplicationService:
             return result
         if hasattr(self.background_execution, "request_stop"):
             self.background_execution.request_stop(command.crawl_id)
-        self._publish(command.crawl_id, CrawlProgressEventKind.STATUS_CHANGED, result.value.status, "Stop requested")
+        self._publish(
+            command.crawl_id,
+            CrawlProgressEventKind.STATUS_CHANGED,
+            result.value.status,
+            "Stop requested",
+        )
         return result
 
     def get_status(self, crawl_id):

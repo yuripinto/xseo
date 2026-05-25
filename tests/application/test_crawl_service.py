@@ -1,7 +1,11 @@
 from datetime import UTC, datetime
 
 from xseo.application import StartCrawlCommand, StopCrawlCommand
-from xseo.application.services import ActiveCrawlRegistry, CrawlApplicationService, EventDeliveryService
+from xseo.application.services import (
+    ActiveCrawlRegistry,
+    CrawlApplicationService,
+    EventDeliveryService,
+)
 from xseo.domain.ids import CrawlId
 
 
@@ -65,7 +69,9 @@ def test_start_crawl_validates_and_delegates_to_background_execution():
 
 
 def test_start_crawl_rejects_invalid_url():
-    service = CrawlApplicationService(CrawlRepository(), BackgroundExecution(), ActiveCrawlRegistry(), clock=Clock())
+    service = CrawlApplicationService(
+        CrawlRepository(), BackgroundExecution(), ActiveCrawlRegistry(), clock=Clock()
+    )
 
     result = service.start_crawl(StartCrawlCommand("ftp://example.com/"))
 
@@ -78,7 +84,9 @@ def test_stop_crawl_delegates_to_active_registry_and_background():
     registry = ActiveCrawlRegistry()
     crawl_id = _crawl_id()
     registry.register(crawl_id, object())
-    service = CrawlApplicationService(CrawlRepository(), background, registry, clock=Clock())
+    service = CrawlApplicationService(
+        CrawlRepository(), background, registry, clock=Clock()
+    )
 
     result = service.request_stop(StopCrawlCommand(crawl_id))
 

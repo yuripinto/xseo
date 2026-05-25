@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (
 
 from xseo.application.events import CrawlProgressEvent, CrawlProgressEventKind
 
-
 _TERMINAL_KINDS = (
     CrawlProgressEventKind.CRAWL_COMPLETED,
     CrawlProgressEventKind.CRAWL_STOPPED,

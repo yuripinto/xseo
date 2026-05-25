@@ -3,14 +3,25 @@ from datetime import UTC, datetime
 from hypothesis import given
 from hypothesis import strategies as st
 
-from tests.adapters.persistence.test_sqlite_repositories import connection, crawl, id_, page
+from tests.adapters.persistence.test_sqlite_repositories import (
+    connection,
+    crawl,
+    id_,
+    page,
+)
 from tests.strategies.domain import query_options
-from xseo.adapters.persistence import SQLiteCrawlDataRepository, SQLiteCrawlRepository, SQLiteResultsReadRepository
+from xseo.adapters.persistence import (
+    SQLiteCrawlDataRepository,
+    SQLiteCrawlRepository,
+    SQLiteResultsReadRepository,
+)
 from xseo.application.commands import ResultQuery
 from xseo.domain.ids import CrawlId, PageId
 
 
-@given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-", min_size=1, max_size=24))
+@given(
+    st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-", min_size=1, max_size=24)
+)
 def test_crawl_round_trip_preserves_stable_fields(suffix):
     conn = connection()
     repo = SQLiteCrawlRepository(conn)
@@ -25,7 +36,9 @@ def test_crawl_round_trip_preserves_stable_fields(suffix):
     assert loaded.created_at == saved.created_at
 
 
-@given(st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-", min_size=1, max_size=24))
+@given(
+    st.text(alphabet="abcdefghijklmnopqrstuvwxyz0123456789-", min_size=1, max_size=24)
+)
 def test_page_read_model_round_trip_preserves_stable_fields(suffix):
     conn = connection()
     saved_crawl = crawl()
@@ -33,7 +46,9 @@ def test_page_read_model_round_trip_preserves_stable_fields(suffix):
     SQLiteCrawlRepository(conn).save_crawl(saved_crawl)
     SQLiteCrawlDataRepository(conn).save_page(saved_page)
 
-    rows = SQLiteResultsReadRepository(conn).list_pages(ResultQuery(saved_crawl.crawl_id))
+    rows = SQLiteResultsReadRepository(conn).list_pages(
+        ResultQuery(saved_crawl.crawl_id)
+    )
 
     assert rows[0].page_id == saved_page.page_id
     assert rows[0].url == saved_page.url

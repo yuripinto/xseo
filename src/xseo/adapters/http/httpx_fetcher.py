@@ -26,12 +26,21 @@ class AsyncHttpFetchPort(Protocol):
 
 
 class HttpxFetchAdapter:
-    def __init__(self, client: httpx.AsyncClient | None = None, max_body_bytes: int = DEFAULT_MAX_BODY_BYTES):
+    def __init__(
+        self,
+        client: httpx.AsyncClient | None = None,
+        max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
+    ):
         self.client = client
         self.max_body_bytes = max_body_bytes
         self.normalizer = UrlNormalizer()
 
-    async def fetch(self, url: NormalizedUrl, timeout_seconds: int = 10, crawl_id: CrawlId | None = None):
+    async def fetch(
+        self,
+        url: NormalizedUrl,
+        timeout_seconds: int = 10,
+        crawl_id: CrawlId | None = None,
+    ):
         try:
             if self.client is None:
                 async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -46,9 +55,13 @@ class HttpxFetchAdapter:
         except httpx.TimeoutException as exc:
             return _failure(url, FetchStatus.TIMEOUT, "fetch.timeout", str(exc))
         except httpx.NetworkError as exc:
-            return _failure(url, FetchStatus.NETWORK_ERROR, "fetch.network_error", str(exc))
+            return _failure(
+                url, FetchStatus.NETWORK_ERROR, "fetch.network_error", str(exc)
+            )
         except httpx.HTTPError as exc:
-            return _failure(url, FetchStatus.INVALID_RESPONSE, "fetch.invalid_response", str(exc))
+            return _failure(
+                url, FetchStatus.INVALID_RESPONSE, "fetch.invalid_response", str(exc)
+            )
 
     def _to_fetch_result(self, requested_url, response, crawl_id):
         body = response.content
@@ -61,7 +74,10 @@ class HttpxFetchAdapter:
                 content_type=response.headers.get("content-type"),
                 body=None,
                 redirect_chain=self._redirect_chain(response, crawl_id),
-                error=DomainError.of("fetch.unsupported_content", "Response body exceeds retained size limit"),
+                error=DomainError.of(
+                    "fetch.unsupported_content",
+                    "Response body exceeds retained size limit",
+                ),
             )
 
         final_url = self._normalize_response_url(response.url)

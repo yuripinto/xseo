@@ -29,7 +29,9 @@ class PageProcessorLinkDiscovery:
         if output.extraction_result.page is not None:
             page = output.extraction_result.page
             self.data_repository.save_page(page)
-            self.data_repository.save_headings(page.page_id, output.extraction_result.headings)
+            self.data_repository.save_headings(
+                page.page_id, output.extraction_result.headings
+            )
             for redirect in getattr(fetch_result, "redirect_chain", ()):
                 self.data_repository.save_redirect(redirect)
         return output.raw_links

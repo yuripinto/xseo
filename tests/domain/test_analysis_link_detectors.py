@@ -22,9 +22,19 @@ def test_detects_broken_and_redirecting_internal_links():
     issues = detect_link_issues(
         crawl_id,
         (
-            LinkStatusRecord(source_page_id, source_url, broken_target, LinkRelation.INTERNAL, 404),
-            LinkStatusRecord(source_page_id, source_url, redirect_target, LinkRelation.INTERNAL, 301),
-            LinkStatusRecord(source_page_id, source_url, _url("https://outside.example.com/"), LinkRelation.EXTERNAL, 404),
+            LinkStatusRecord(
+                source_page_id, source_url, broken_target, LinkRelation.INTERNAL, 404
+            ),
+            LinkStatusRecord(
+                source_page_id, source_url, redirect_target, LinkRelation.INTERNAL, 301
+            ),
+            LinkStatusRecord(
+                source_page_id,
+                source_url,
+                _url("https://outside.example.com/"),
+                LinkRelation.EXTERNAL,
+                404,
+            ),
         ),
     )
 
@@ -32,4 +42,7 @@ def test_detects_broken_and_redirecting_internal_links():
         IssueType.BROKEN_INTERNAL_LINK,
         IssueType.REDIRECTING_URL,
     ]
-    assert [issue.severity for issue in issues] == [IssueSeverity.HIGH, IssueSeverity.LOW]
+    assert [issue.severity for issue in issues] == [
+        IssueSeverity.HIGH,
+        IssueSeverity.LOW,
+    ]

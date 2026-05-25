@@ -121,7 +121,9 @@ class UrlFrontier:
         max_depth = None
         for entry in self._entries.values():
             counts[entry.state] += 1
-            max_depth = entry.depth if max_depth is None else max(max_depth, entry.depth)
+            max_depth = (
+                entry.depth if max_depth is None else max(max_depth, entry.depth)
+            )
         return FrontierSnapshot(
             queued_count=counts[FrontierEntryState.QUEUED],
             visited_count=counts[FrontierEntryState.VISITED],

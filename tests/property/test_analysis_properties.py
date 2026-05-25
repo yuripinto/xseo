@@ -1,9 +1,13 @@
 from hypothesis import given
 from hypothesis import strategies as st
 
-from tests.strategies.domain import content_hashes, crawl_ids
 from tests.domain.test_analysis_page_detectors import _id, _page, _url
-from xseo.domain.analysis import IssueAnalysisService, LinkStatusRecord, detect_page_issues
+from tests.strategies.domain import content_hashes, crawl_ids
+from xseo.domain.analysis import (
+    IssueAnalysisService,
+    LinkStatusRecord,
+    detect_page_issues,
+)
 from xseo.domain.duplicates import detect_duplicate_groups
 from xseo.domain.entities import Heading
 from xseo.domain.enums import HeadingLevel, IssueType, LinkRelation
@@ -20,7 +24,9 @@ def test_title_threshold_classification_is_deterministic(title_length):
     first = detect_page_issues(page, headings)
     second = detect_page_issues(page, headings)
 
-    assert [issue.issue_id.value for issue in first] == [issue.issue_id.value for issue in second]
+    assert [issue.issue_id.value for issue in first] == [
+        issue.issue_id.value for issue in second
+    ]
     issue_types = {issue.issue_type for issue in first}
     if title_length == 0:
         assert IssueType.TITLE_MISSING in issue_types
@@ -30,16 +36,24 @@ def test_title_threshold_classification_is_deterministic(title_length):
         assert IssueType.TITLE_TOO_LONG in issue_types
     else:
         assert not issue_types.intersection(
-            {IssueType.TITLE_MISSING, IssueType.TITLE_TOO_SHORT, IssueType.TITLE_TOO_LONG}
+            {
+                IssueType.TITLE_MISSING,
+                IssueType.TITLE_TOO_SHORT,
+                IssueType.TITLE_TOO_LONG,
+            }
         )
 
 
 @given(
     crawl_ids(),
     content_hashes(),
-    st.lists(st.integers(min_value=1, max_value=1000), min_size=2, max_size=8, unique=True),
+    st.lists(
+        st.integers(min_value=1, max_value=1000), min_size=2, max_size=8, unique=True
+    ),
 )
-def test_duplicate_groups_are_deterministic_and_only_include_duplicate_hash_pages(generated_crawl_id, content_hash, suffixes):
+def test_duplicate_groups_are_deterministic_and_only_include_duplicate_hash_pages(
+    generated_crawl_id, content_hash, suffixes
+):
     crawl_id = generated_crawl_id
     pages = tuple(
         _page(

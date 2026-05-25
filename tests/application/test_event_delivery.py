@@ -36,7 +36,9 @@ def test_event_delivery_preserves_order_and_crawl_scope():
 def test_unsubscribe_is_idempotent_and_prevents_later_delivery():
     service = EventDeliveryService()
     delivered = []
-    subscription = service.subscribe(_crawl_id(), lambda event: delivered.append(event)).value
+    subscription = service.subscribe(
+        _crawl_id(), lambda event: delivered.append(event)
+    ).value
 
     assert service.unsubscribe(subscription.subscription_id).success
     assert service.unsubscribe(subscription.subscription_id).success

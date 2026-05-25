@@ -36,7 +36,11 @@ class DomainToAppEventBridge:
         self, event: object
     ) -> tuple[CrawlProgressEventKind | None, object, str | None]:
         if isinstance(event, CrawlStarted):
-            return CrawlProgressEventKind.CRAWL_STARTED, CrawlStatus.RUNNING, "Crawl started"
+            return (
+                CrawlProgressEventKind.CRAWL_STARTED,
+                CrawlStatus.RUNNING,
+                "Crawl started",
+            )
 
         if isinstance(event, PageFetched):
             if event.status == FetchStatus.SUCCESS:

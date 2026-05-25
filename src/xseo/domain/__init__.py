@@ -1,19 +1,5 @@
 """Domain foundation for xseo."""
 
-from xseo.domain.entities import (
-    Crawl,
-    CrawlConfig,
-    DuplicateGroup,
-    ExportResult,
-    ExtractedPage,
-    ExtractionResult,
-    FetchResult,
-    Heading,
-    Issue,
-    PageLink,
-    Redirect,
-    UrlRecord,
-)
 from xseo.domain.analysis import (
     DEFAULT_SEVERITY_POLICY,
     DEFAULT_THRESHOLDS,
@@ -30,29 +16,27 @@ from xseo.domain.analysis import (
     issue_key,
     normalize_comparable_text,
 )
-from xseo.domain.extraction import (
-    RawExtractedLink,
-    SeoExtractionOutput,
-    SeoExtractionPipeline,
-    content_hash_for_text,
-    extract_raw_links,
-    normalize_visible_text,
-    word_count,
+from xseo.domain.crawler import (
+    CrawlRunResult,
+    NeverStopToken,
+    StopToken,
+    UrlCrawlEngine,
 )
 from xseo.domain.duplicates import detect_duplicate_groups
-from xseo.domain.frontier import (
-    FrontierAddResult,
-    FrontierAddStatus,
-    FrontierAddSummary,
-    FrontierEntry,
-    FrontierEntryState,
-    FrontierSnapshot,
-    RejectedUrl,
-    RejectionReason,
-    UrlFrontier,
-    UrlNormalizer,
+from xseo.domain.entities import (
+    Crawl,
+    CrawlConfig,
+    DuplicateGroup,
+    ExportResult,
+    ExtractedPage,
+    ExtractionResult,
+    FetchResult,
+    Heading,
+    Issue,
+    PageLink,
+    Redirect,
+    UrlRecord,
 )
-from xseo.domain.crawler import CrawlRunResult, NeverStopToken, StopToken, UrlCrawlEngine
 from xseo.domain.enums import (
     CrawlStatus,
     ExportKind,
@@ -70,6 +54,27 @@ from xseo.domain.errors import (
     ExportErrorCode,
     IdErrorCode,
     UrlErrorCode,
+)
+from xseo.domain.extraction import (
+    RawExtractedLink,
+    SeoExtractionOutput,
+    SeoExtractionPipeline,
+    content_hash_for_text,
+    extract_raw_links,
+    normalize_visible_text,
+    word_count,
+)
+from xseo.domain.frontier import (
+    FrontierAddResult,
+    FrontierAddStatus,
+    FrontierAddSummary,
+    FrontierEntry,
+    FrontierEntryState,
+    FrontierSnapshot,
+    RejectedUrl,
+    RejectionReason,
+    UrlFrontier,
+    UrlNormalizer,
 )
 from xseo.domain.ids import (
     CrawlId,
@@ -99,6 +104,7 @@ __all__ = [
     "DuplicateGroup",
     "DuplicateGroupId",
     "EventErrorCode",
+    "ExportErrorCode",
     "ExportId",
     "ExportKind",
     "ExportResult",

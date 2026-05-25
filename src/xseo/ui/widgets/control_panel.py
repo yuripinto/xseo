@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
-    QLabel,
     QLineEdit,
     QPushButton,
     QSpinBox,
@@ -107,14 +106,23 @@ class ControlPanel(QWidget):
         url = self.url_input.text().strip()
         if not url:
             return
-        self.start_requested.emit(url, self.page_limit.value(), self.timeout.value(), self.same_host.isChecked())
+        self.start_requested.emit(
+            url,
+            self.page_limit.value(),
+            self.timeout.value(),
+            self.same_host.isChecked(),
+        )
 
     def _on_export_pages(self) -> None:
-        path, _ = QFileDialog.getSaveFileName(self, "Export Pages", "pages.csv", "CSV (*.csv)")
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Pages", "pages.csv", "CSV (*.csv)"
+        )
         if path:
             self.export_pages_requested.emit(path)
 
     def _on_export_issues(self) -> None:
-        path, _ = QFileDialog.getSaveFileName(self, "Export Issues", "issues.csv", "CSV (*.csv)")
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Issues", "issues.csv", "CSV (*.csv)"
+        )
         if path:
             self.export_issues_requested.emit(path)

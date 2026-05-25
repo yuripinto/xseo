@@ -129,7 +129,9 @@ class Crawl:
         )
 
 
-def _invalid_transition(current: CrawlStatus, target: CrawlStatus) -> ValidationResult[Crawl]:
+def _invalid_transition(
+    current: CrawlStatus, target: CrawlStatus
+) -> ValidationResult[Crawl]:
     return ValidationResult.failure(
         DomainValidationError.of(
             CrawlStateErrorCode.INVALID_TRANSITION,

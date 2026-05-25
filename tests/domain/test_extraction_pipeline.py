@@ -67,7 +67,9 @@ def test_extraction_pipeline_extracts_metadata_headings_links_and_hash():
 def test_extraction_pipeline_returns_error_for_non_html_success():
     crawl_id, page_id = _ids()
 
-    output = SeoExtractionPipeline().extract(_fetch(b"{}", "application/json"), crawl_id, page_id)
+    output = SeoExtractionPipeline().extract(
+        _fetch(b"{}", "application/json"), crawl_id, page_id
+    )
 
     assert output.extraction_result.page is None
     assert output.extraction_result.error.code == "extraction.not_html"
@@ -76,7 +78,9 @@ def test_extraction_pipeline_returns_error_for_non_html_success():
 def test_extraction_pipeline_decodes_invalid_utf8_with_replacement():
     crawl_id, page_id = _ids()
 
-    output = SeoExtractionPipeline().extract(_fetch(b"<html><body>\xff</body></html>"), crawl_id, page_id)
+    output = SeoExtractionPipeline().extract(
+        _fetch(b"<html><body>\xff</body></html>"), crawl_id, page_id
+    )
 
     assert output.extraction_result.page is not None
 
@@ -84,6 +88,8 @@ def test_extraction_pipeline_decodes_invalid_utf8_with_replacement():
 def test_extraction_pipeline_tolerates_malformed_html():
     crawl_id, page_id = _ids()
 
-    output = SeoExtractionPipeline().extract(_fetch(b"<html><title>Broken<body><h1>X"), crawl_id, page_id)
+    output = SeoExtractionPipeline().extract(
+        _fetch(b"<html><title>Broken<body><h1>X"), crawl_id, page_id
+    )
 
     assert output.extraction_result.error is None
