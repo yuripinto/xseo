@@ -51,11 +51,29 @@ Double-click any page for full detail — headings, links, redirects, and per-pa
 
 ## Install
 
+### Download a ready-to-run build (no Python needed)
+
+Grab the latest `.zip` for your OS from the [Releases page](https://github.com/yuripinto/xseo/releases/latest), unzip it, and run the `xseo` executable inside.
+
+> The builds are not code-signed yet, so the OS may warn you the first time:
+> - **macOS:** right-click the app → **Open** → **Open** (or `System Settings → Privacy & Security → Open Anyway`).
+> - **Windows:** on the SmartScreen prompt, click **More info → Run anyway**.
+
+### Install from PyPI (for Python users)
+
+```bash
+pipx install xseo   # isolated, recommended
+# or
+pip install xseo
+```
+
+Then launch with `xseo-ui`. Requires Python 3.12 or newer.
+
+### From source
+
 ```bash
 python3 -m pip install -e '.[test]'
 ```
-
-Requires Python 3.12 or newer.
 
 ## Run
 
