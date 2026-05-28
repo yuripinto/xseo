@@ -5,20 +5,30 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "xseo"
 version = "0.1.0"
-description = "Local-first desktop SEO crawler prototype"
+description = "Local-first desktop SEO crawler"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
+authors = [{ name = "Yuri Silva" }]
+keywords = ["seo", "crawler", "desktop", "audit", "local-first"]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.12",
   "Operating System :: OS Independent",
+  "Environment :: X11 Applications :: Qt",
+  "Intended Audience :: Developers",
+  "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
 ]
 dependencies = [
   "httpx>=0.27",
   "selectolax>=0.3",
   "PySide6>=6.7",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yuripinto/xseo"
+Repository = "https://github.com/yuripinto/xseo"
+Issues = "https://github.com/yuripinto/xseo/issues"
 
 [project.scripts]
 xseo-ui = "xseo.ui.app:main"
@@ -32,6 +42,13 @@ test = [
 dev = [
   "ruff>=0.6",
 ]
+package = [
+  "pyinstaller>=6",
+  "build>=1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
