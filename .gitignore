@@ -33,6 +33,7 @@ htmlcov/
 # but keep these dotfiles tracked
 !.gitignore
 !.github/
+!.release-please-manifest.json
 
 # Project-specific
 *-docs/
