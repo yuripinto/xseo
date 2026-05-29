@@ -8,6 +8,8 @@
 
 `xseo` is a desktop application that crawls a website, extracts on-page SEO signals, detects common issues and content duplication, and renders the results in a clean UI. Everything runs locally and persists to a single SQLite file under `~/.xseo/`.
 
+![xseo crawling a site live](docs/images/xseo-demo.gif)
+
 ![xseo issues view](docs/images/04-issues.png)
 
 ## Features
