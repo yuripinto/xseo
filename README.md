@@ -53,7 +53,15 @@ Double-click any page for full detail — headings, links, redirects, and per-pa
 
 ### Download a ready-to-run build (no Python needed)
 
-Grab the latest `.zip` for your OS from the [Releases page](https://github.com/yuripinto/xseo/releases/latest), unzip it, and run the `xseo` executable inside.
+Download the build for your OS, unzip it, and run the `xseo` executable inside:
+
+| OS | Download |
+| --- | --- |
+| macOS (Apple Silicon) | [xseo-macos-arm64.zip](https://github.com/yuripinto/xseo/releases/latest/download/xseo-macos-arm64.zip) |
+| Windows (x64) | [xseo-windows-x64.zip](https://github.com/yuripinto/xseo/releases/latest/download/xseo-windows-x64.zip) |
+| Linux (x64) | [xseo-linux-x64.zip](https://github.com/yuripinto/xseo/releases/latest/download/xseo-linux-x64.zip) |
+
+These links always point to the most recent release. You can also browse every build on the [Releases page](https://github.com/yuripinto/xseo/releases/latest).
 
 > The builds are not code-signed yet, so the OS may warn you the first time:
 > - **macOS:** right-click the app → **Open** → **Open** (or `System Settings → Privacy & Security → Open Anyway`).
