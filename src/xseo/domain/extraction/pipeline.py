@@ -39,6 +39,7 @@ class SeoExtractionPipeline:
             visible_text = _visible_text(tree)
             final_url = fetch_result.final_url or fetch_result.requested_url
             canonical = _canonical_url(tree, final_url, self.normalizer)
+            image_count, images_missing_alt = _image_alt_stats(tree)
 
             page = ExtractedPage(
                 page_id=page_id,
@@ -54,6 +55,8 @@ class SeoExtractionPipeline:
                 word_count=WordCount.create(word_count(visible_text)).value,
                 content_length=len(body),
                 content_hash=content_hash_for_text(visible_text),
+                image_count=image_count,
+                images_missing_alt=images_missing_alt,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -124,6 +127,12 @@ def _headings(tree, page_id):
                     )
                 )
     return tuple(headings)
+
+
+def _image_alt_stats(tree):
+    images = tree.css("img")
+    missing = sum(1 for image in images if "alt" not in image.attributes)
+    return len(images), missing
 
 
 def _visible_text(tree):

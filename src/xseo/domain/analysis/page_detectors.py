@@ -162,4 +162,16 @@ def detect_page_issues(
             )
         )
 
+    if page.images_missing_alt > 0:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.IMAGES_MISSING_ALT,
+                f"{page.images_missing_alt} of {page.image_count} images are missing alt text.",
+                severity_policy,
+            )
+        )
+
     return tuple(issues)
