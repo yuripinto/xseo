@@ -46,6 +46,7 @@ class IssueType(StrEnum):
     PAGE_TOO_LARGE = "page_too_large"
     NOINDEX_PAGE = "noindex_page"
     INSECURE_INTERNAL_LINK = "insecure_internal_link"
+    IMAGES_MISSING_ALT = "images_missing_alt"
 
 
 class HeadingLevel(StrEnum):

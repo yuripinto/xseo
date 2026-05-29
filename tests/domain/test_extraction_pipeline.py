@@ -64,6 +64,23 @@ def test_extraction_pipeline_extracts_metadata_headings_links_and_hash():
     assert output.raw_links[0].nofollow
 
 
+def test_extraction_pipeline_counts_images_missing_alt():
+    crawl_id, page_id = _ids()
+    html = b"""
+    <html><body>
+      <img src="/described.png" alt="A described image">
+      <img src="/missing.png">
+      <img src="/decorative.png" alt="">
+    </body></html>
+    """
+
+    output = SeoExtractionPipeline().extract(_fetch(html), crawl_id, page_id)
+
+    page = output.extraction_result.page
+    assert page.image_count == 3
+    assert page.images_missing_alt == 1
+
+
 def test_extraction_pipeline_returns_error_for_non_html_success():
     crawl_id, page_id = _ids()
 

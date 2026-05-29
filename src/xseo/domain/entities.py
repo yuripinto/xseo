@@ -182,6 +182,8 @@ class ExtractedPage:
     word_count: WordCount
     content_length: int
     content_hash: ContentHash | None
+    image_count: int = 0
+    images_missing_alt: int = 0
 
 
 @dataclass(frozen=True)

@@ -139,3 +139,22 @@ def test_indexable_page_within_size_limit_is_clean():
 
     assert IssueType.NOINDEX_PAGE not in _issue_types(issues)
     assert IssueType.PAGE_TOO_LARGE not in _issue_types(issues)
+
+
+def test_detects_images_missing_alt():
+    page = _page(image_count=5, images_missing_alt=2)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.IMAGES_MISSING_ALT in _issue_types(issues)
+    issue = next(i for i in issues if i.issue_type == IssueType.IMAGES_MISSING_ALT)
+    assert issue.severity == IssueSeverity.LOW
+    assert "2 of 5" in issue.explanation
+
+
+def test_page_with_all_images_described_is_clean():
+    page = _page(image_count=4, images_missing_alt=0)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.IMAGES_MISSING_ALT not in _issue_types(issues)
