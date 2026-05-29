@@ -106,3 +106,36 @@ def test_valid_page_has_no_page_level_issues():
     page = _page()
 
     assert detect_page_issues(page, headings=(_h1(page),)) == ()
+
+
+def test_detects_oversized_page():
+    page = _page(content_length=3_000_000)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.PAGE_TOO_LARGE in _issue_types(issues)
+    oversized = next(
+        issue for issue in issues if issue.issue_type == IssueType.PAGE_TOO_LARGE
+    )
+    assert oversized.severity == IssueSeverity.LOW
+
+
+def test_detects_noindex_page():
+    page = _page(robots_meta="noindex, nofollow")
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.NOINDEX_PAGE in _issue_types(issues)
+    noindex = next(
+        issue for issue in issues if issue.issue_type == IssueType.NOINDEX_PAGE
+    )
+    assert noindex.severity == IssueSeverity.MEDIUM
+
+
+def test_indexable_page_within_size_limit_is_clean():
+    page = _page(robots_meta="index, follow", content_length=4096)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.NOINDEX_PAGE not in _issue_types(issues)
+    assert IssueType.PAGE_TOO_LARGE not in _issue_types(issues)

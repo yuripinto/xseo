@@ -51,3 +51,37 @@ def detect_link_issues(crawl_id, records, severity_policy=DEFAULT_SEVERITY_POLIC
                 )
             )
     return tuple(issues)
+
+
+def detect_insecure_link_issues(pages, links, severity_policy=DEFAULT_SEVERITY_POLICY):
+    secure_pages = {
+        page.page_id.value: page for page in pages if _is_https(page.final_url)
+    }
+    issues = []
+    for link in links:
+        if link.relation != LinkRelation.INTERNAL:
+            continue
+        source = secure_pages.get(link.source_page_id.value)
+        if source is None or not _is_http(link.target_url):
+            continue
+        issues.append(
+            build_issue(
+                source.crawl_id,
+                source.page_id,
+                source.final_url,
+                IssueType.INSECURE_INTERNAL_LINK,
+                f"Secure page links to an insecure (http) URL: {link.target_url.value}",
+                severity_policy,
+                discriminator=link.target_url.value,
+                key_subject=source.page_id,
+            )
+        )
+    return tuple(issues)
+
+
+def _is_https(url):
+    return url.value.lower().startswith("https://")
+
+
+def _is_http(url):
+    return url.value.lower().startswith("http://")

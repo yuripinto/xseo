@@ -138,4 +138,28 @@ def detect_page_issues(
             )
         )
 
+    if page.content_length > thresholds.page_size_max_bytes:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.PAGE_TOO_LARGE,
+                f"Page HTML is larger than {thresholds.page_size_max_bytes} bytes.",
+                severity_policy,
+            )
+        )
+
+    if "noindex" in (page.robots_meta or "").lower():
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.NOINDEX_PAGE,
+                "Page is marked noindex and will be excluded from search results.",
+                severity_policy,
+            )
+        )
+
     return tuple(issues)
