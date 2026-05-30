@@ -14,6 +14,7 @@ class ThresholdPolicy:
     meta_description_min: int = 70
     meta_description_max: int = 160
     thin_content_min_words: int = 200
+    page_size_max_bytes: int = 2_000_000
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,9 @@ class IssueSeverityPolicy:
             IssueType.CANONICAL_MISMATCH: IssueSeverity.HIGH,
             IssueType.THIN_CONTENT: IssueSeverity.LOW,
             IssueType.EXACT_DUPLICATE: IssueSeverity.MEDIUM,
+            IssueType.PAGE_TOO_LARGE: IssueSeverity.LOW,
+            IssueType.NOINDEX_PAGE: IssueSeverity.MEDIUM,
+            IssueType.INSECURE_INTERNAL_LINK: IssueSeverity.MEDIUM,
         }
     )
 

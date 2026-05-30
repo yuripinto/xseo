@@ -10,7 +10,11 @@ from xseo.domain.analysis.keys import (
     issue_key,
     normalize_comparable_text,
 )
-from xseo.domain.analysis.link_detectors import LinkStatusRecord, detect_link_issues
+from xseo.domain.analysis.link_detectors import (
+    LinkStatusRecord,
+    detect_insecure_link_issues,
+    detect_link_issues,
+)
 from xseo.domain.analysis.page_detectors import detect_page_issues
 from xseo.domain.analysis.policies import (
     DEFAULT_SEVERITY_POLICY,
@@ -30,6 +34,7 @@ __all__ = [
     "detect_cross_page_issues",
     "detect_duplicate_meta_description_issues",
     "detect_duplicate_title_issues",
+    "detect_insecure_link_issues",
     "detect_link_issues",
     "detect_page_issues",
     "duplicate_group_key",

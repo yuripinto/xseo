@@ -1,4 +1,10 @@
-from xseo.domain.analysis import LinkStatusRecord, detect_link_issues
+from tests.domain.test_analysis_page_detectors import _page
+from xseo.domain.analysis import (
+    LinkStatusRecord,
+    detect_insecure_link_issues,
+    detect_link_issues,
+)
+from xseo.domain.entities import PageLink
 from xseo.domain.enums import IssueSeverity, IssueType, LinkRelation
 from xseo.domain.ids import CrawlId, PageId
 from xseo.domain.urls import NormalizedUrl
@@ -46,3 +52,50 @@ def test_detects_broken_and_redirecting_internal_links():
         IssueSeverity.HIGH,
         IssueSeverity.LOW,
     ]
+
+
+def test_flags_secure_page_linking_to_insecure_internal_url():
+    page = _page(final_url=_url("https://example.com/page"))
+    links = (
+        PageLink(
+            page.page_id,
+            _url("http://example.com/insecure"),
+            LinkRelation.INTERNAL,
+            "insecure link",
+        ),
+        PageLink(
+            page.page_id,
+            _url("https://example.com/secure"),
+            LinkRelation.INTERNAL,
+            "secure link",
+        ),
+        PageLink(
+            page.page_id,
+            _url("http://other.example.com/"),
+            LinkRelation.EXTERNAL,
+            "external",
+        ),
+    )
+
+    issues = detect_insecure_link_issues((page,), links)
+
+    assert [issue.issue_type for issue in issues] == [
+        IssueType.INSECURE_INTERNAL_LINK,
+    ]
+    assert issues[0].severity == IssueSeverity.MEDIUM
+    assert issues[0].page_id == page.page_id
+    assert "http://example.com/insecure" in issues[0].explanation
+
+
+def test_insecure_link_from_non_secure_page_is_ignored():
+    page = _page(final_url=_url("http://example.com/page"))
+    links = (
+        PageLink(
+            page.page_id,
+            _url("http://example.com/insecure"),
+            LinkRelation.INTERNAL,
+            "insecure link",
+        ),
+    )
+
+    assert detect_insecure_link_issues((page,), links) == ()

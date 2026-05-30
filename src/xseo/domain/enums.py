@@ -43,6 +43,9 @@ class IssueType(StrEnum):
     CANONICAL_MISMATCH = "canonical_mismatch"
     THIN_CONTENT = "thin_content"
     EXACT_DUPLICATE = "exact_duplicate"
+    PAGE_TOO_LARGE = "page_too_large"
+    NOINDEX_PAGE = "noindex_page"
+    INSECURE_INTERNAL_LINK = "insecure_internal_link"
 
 
 class HeadingLevel(StrEnum):
