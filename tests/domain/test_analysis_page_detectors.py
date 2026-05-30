@@ -32,6 +32,9 @@ def _page(**overrides):
         "word_count": WordCount.create(250).value,
         "content_length": 2048,
         "content_hash": ContentHash.create("abc12345").value,
+        "has_viewport": True,
+        "has_lang": True,
+        "has_charset": True,
     }
     values.update(overrides)
     return ExtractedPage(**values)
@@ -158,3 +161,34 @@ def test_page_with_all_images_described_is_clean():
     issues = detect_page_issues(page, headings=(_h1(page),))
 
     assert IssueType.IMAGES_MISSING_ALT not in _issue_types(issues)
+
+
+def test_detects_missing_head_meta():
+    page = _page(has_viewport=False, has_lang=False, has_charset=False)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.MISSING_VIEWPORT in types
+    assert IssueType.MISSING_LANG in types
+    assert IssueType.MISSING_CHARSET in types
+
+
+def test_missing_viewport_is_medium_severity():
+    page = _page(has_viewport=False)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+    viewport = next(
+        issue for issue in issues if issue.issue_type == IssueType.MISSING_VIEWPORT
+    )
+
+    assert viewport.severity == IssueSeverity.MEDIUM
+
+
+def test_page_with_head_meta_present_is_clean():
+    page = _page(has_viewport=True, has_lang=True, has_charset=True)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.MISSING_VIEWPORT not in types
+    assert IssueType.MISSING_LANG not in types
+    assert IssueType.MISSING_CHARSET not in types

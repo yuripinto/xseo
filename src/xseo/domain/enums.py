@@ -47,6 +47,9 @@ class IssueType(StrEnum):
     NOINDEX_PAGE = "noindex_page"
     INSECURE_INTERNAL_LINK = "insecure_internal_link"
     IMAGES_MISSING_ALT = "images_missing_alt"
+    MISSING_VIEWPORT = "missing_viewport"
+    MISSING_LANG = "missing_lang"
+    MISSING_CHARSET = "missing_charset"
 
 
 class HeadingLevel(StrEnum):

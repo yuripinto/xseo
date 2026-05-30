@@ -40,7 +40,10 @@ CREATE TABLE IF NOT EXISTS pages (
     content_length INTEGER NOT NULL,
     content_hash TEXT,
     image_count INTEGER NOT NULL DEFAULT 0,
-    images_missing_alt INTEGER NOT NULL DEFAULT 0
+    images_missing_alt INTEGER NOT NULL DEFAULT 0,
+    has_viewport INTEGER NOT NULL DEFAULT 0,
+    has_lang INTEGER NOT NULL DEFAULT 0,
+    has_charset INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -123,5 +126,17 @@ PAGE_COLUMN_MIGRATIONS = (
     (
         "images_missing_alt",
         "ALTER TABLE pages ADD COLUMN images_missing_alt INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "has_viewport",
+        "ALTER TABLE pages ADD COLUMN has_viewport INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "has_lang",
+        "ALTER TABLE pages ADD COLUMN has_lang INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "has_charset",
+        "ALTER TABLE pages ADD COLUMN has_charset INTEGER NOT NULL DEFAULT 0",
     ),
 )

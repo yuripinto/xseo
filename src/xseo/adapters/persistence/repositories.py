@@ -97,8 +97,8 @@ class SQLiteCrawlDataRepository:
             INSERT INTO pages(
                 page_id, crawl_id, url, final_url, status_code, content_type, title,
                 meta_description, canonical_url, robots_meta, word_count, content_length, content_hash,
-                image_count, images_missing_alt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                image_count, images_missing_alt, has_viewport, has_lang, has_charset
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(page_id) DO UPDATE SET
                 crawl_id=excluded.crawl_id,
                 url=excluded.url,
@@ -113,7 +113,10 @@ class SQLiteCrawlDataRepository:
                 content_length=excluded.content_length,
                 content_hash=excluded.content_hash,
                 image_count=excluded.image_count,
-                images_missing_alt=excluded.images_missing_alt
+                images_missing_alt=excluded.images_missing_alt,
+                has_viewport=excluded.has_viewport,
+                has_lang=excluded.has_lang,
+                has_charset=excluded.has_charset
             """,
             _page_params(page),
         )
@@ -476,6 +479,9 @@ def _page_params(page):
         page.content_hash.value if page.content_hash else None,
         page.image_count,
         page.images_missing_alt,
+        int(page.has_viewport),
+        int(page.has_lang),
+        int(page.has_charset),
     )
 
 
@@ -521,6 +527,9 @@ def _page_from_row(row):
         ContentHash.create(row["content_hash"]).value if row["content_hash"] else None,
         row["image_count"],
         row["images_missing_alt"],
+        bool(row["has_viewport"]),
+        bool(row["has_lang"]),
+        bool(row["has_charset"]),
     )
 
 

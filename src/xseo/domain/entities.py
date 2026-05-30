@@ -184,6 +184,9 @@ class ExtractedPage:
     content_hash: ContentHash | None
     image_count: int = 0
     images_missing_alt: int = 0
+    has_viewport: bool = False
+    has_lang: bool = False
+    has_charset: bool = False
 
 
 @dataclass(frozen=True)
