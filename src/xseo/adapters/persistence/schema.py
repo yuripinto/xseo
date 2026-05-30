@@ -38,7 +38,9 @@ CREATE TABLE IF NOT EXISTS pages (
     robots_meta TEXT,
     word_count INTEGER NOT NULL,
     content_length INTEGER NOT NULL,
-    content_hash TEXT
+    content_hash TEXT,
+    image_count INTEGER NOT NULL DEFAULT 0,
+    images_missing_alt INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -107,3 +109,19 @@ CREATE INDEX IF NOT EXISTS idx_issues_severity ON issues(crawl_id, severity, iss
 CREATE INDEX IF NOT EXISTS idx_duplicate_groups_crawl ON duplicate_groups(crawl_id, content_hash);
 CREATE INDEX IF NOT EXISTS idx_duplicate_group_pages_page ON duplicate_group_pages(page_id);
 """
+
+
+# Additive column migrations for databases created before these columns existed.
+# The CREATE TABLE above covers fresh databases; these ALTERs backfill existing
+# ones. Each entry is (column_name, ddl_statement) and is applied only when the
+# column is absent, so running them repeatedly is safe.
+PAGE_COLUMN_MIGRATIONS = (
+    (
+        "image_count",
+        "ALTER TABLE pages ADD COLUMN image_count INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "images_missing_alt",
+        "ALTER TABLE pages ADD COLUMN images_missing_alt INTEGER NOT NULL DEFAULT 0",
+    ),
+)

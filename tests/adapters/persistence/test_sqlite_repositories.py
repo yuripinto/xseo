@@ -87,6 +87,49 @@ def test_schema_initialization_is_idempotent():
     assert version == 1
 
 
+def test_migration_adds_image_columns_to_legacy_pages_table():
+    import sqlite3
+
+    from xseo.adapters.persistence.database import _apply_column_migrations
+
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        """
+        CREATE TABLE pages (
+            page_id TEXT PRIMARY KEY,
+            crawl_id TEXT NOT NULL,
+            url TEXT NOT NULL,
+            final_url TEXT NOT NULL,
+            status_code INTEGER NOT NULL,
+            content_type TEXT,
+            title TEXT,
+            meta_description TEXT,
+            canonical_url TEXT,
+            robots_meta TEXT,
+            word_count INTEGER NOT NULL,
+            content_length INTEGER NOT NULL,
+            content_hash TEXT
+        )
+        """
+    )
+    conn.execute(
+        "INSERT INTO pages(page_id, crawl_id, url, final_url, status_code, "
+        "word_count, content_length) VALUES ('p1','c1','u','u',200,10,100)"
+    )
+
+    _apply_column_migrations(conn)
+    _apply_column_migrations(conn)  # idempotent: running again is a no-op
+
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(pages)")}
+    assert {"image_count", "images_missing_alt"} <= columns
+    legacy_row = conn.execute(
+        "SELECT image_count, images_missing_alt FROM pages WHERE page_id = 'p1'"
+    ).fetchone()
+    assert legacy_row["image_count"] == 0
+    assert legacy_row["images_missing_alt"] == 0
+
+
 def test_crawl_round_trip_and_recent_selection():
     conn = connection()
     repo = SQLiteCrawlRepository(conn)

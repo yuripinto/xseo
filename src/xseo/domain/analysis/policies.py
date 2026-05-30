@@ -39,6 +39,7 @@ class IssueSeverityPolicy:
             IssueType.PAGE_TOO_LARGE: IssueSeverity.LOW,
             IssueType.NOINDEX_PAGE: IssueSeverity.MEDIUM,
             IssueType.INSECURE_INTERNAL_LINK: IssueSeverity.MEDIUM,
+            IssueType.IMAGES_MISSING_ALT: IssueSeverity.LOW,
         }
     )
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from xseo.adapters.persistence.schema import DDL
+from xseo.adapters.persistence.schema import DDL, PAGE_COLUMN_MIGRATIONS
 
 
 class SQLiteDatabase:
@@ -23,12 +23,21 @@ class SQLiteDatabase:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript(DDL)
+        _apply_column_migrations(connection)
         return connection
 
     def initialize(self):
         with self.connect():
             pass
         return self
+
+
+def _apply_column_migrations(connection):
+    existing = {row["name"] for row in connection.execute("PRAGMA table_info(pages)")}
+    for column, statement in PAGE_COLUMN_MIGRATIONS:
+        if column not in existing:
+            connection.execute(statement)
+    connection.commit()
 
 
 def sqlite_database(path):
