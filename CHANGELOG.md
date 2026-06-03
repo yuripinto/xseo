@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/yuripinto/xseo/compare/v0.2.0...v0.3.0) (2026-06-03)
+
+
+### Features
+
+* detect images missing alt text ([#10](https://github.com/yuripinto/xseo/issues/10)) ([578361f](https://github.com/yuripinto/xseo/commit/578361f556e69ad9b13848d9356ff5aaeb1b1154))
+* detect missing viewport, lang, and charset declarations ([#11](https://github.com/yuripinto/xseo/issues/11)) ([18bb892](https://github.com/yuripinto/xseo/commit/18bb892180a357709a39942f74e99132d50bc96b))
+* detect oversized pages, noindex pages, and insecure internal links ([#8](https://github.com/yuripinto/xseo/issues/8)) ([1a0678a](https://github.com/yuripinto/xseo/commit/1a0678a1d75fe5a6ae2c58ec012440f1bdcf6436))
+
+
+### Documentation
+
+* add a live crawl demo gif to the top of the README ([#7](https://github.com/yuripinto/xseo/issues/7)) ([9a79a69](https://github.com/yuripinto/xseo/commit/9a79a697410f029a7f7ddaeaa06c6c08a5e9140b))
+* add direct per-OS download links to the README ([#4](https://github.com/yuripinto/xseo/issues/4)) ([55a8001](https://github.com/yuripinto/xseo/commit/55a8001bd6b42cc7c8f6490ffa2fa87f8a793a2a))
+
 ## [0.2.0](https://github.com/yuripinto/xseo/compare/v0.1.0...v0.2.0) (2026-05-28)
 
 
