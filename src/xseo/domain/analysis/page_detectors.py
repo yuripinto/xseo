@@ -174,4 +174,40 @@ def detect_page_issues(
             )
         )
 
+    if not page.has_viewport:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.MISSING_VIEWPORT,
+                "Page has no responsive viewport meta tag.",
+                severity_policy,
+            )
+        )
+
+    if not page.has_lang:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.MISSING_LANG,
+                "Page has no lang attribute on the <html> element.",
+                severity_policy,
+            )
+        )
+
+    if not page.has_charset:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.MISSING_CHARSET,
+                "Page declares no character encoding.",
+                severity_policy,
+            )
+        )
+
     return tuple(issues)

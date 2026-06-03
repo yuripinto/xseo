@@ -40,6 +40,9 @@ class SeoExtractionPipeline:
             final_url = fetch_result.final_url or fetch_result.requested_url
             canonical = _canonical_url(tree, final_url, self.normalizer)
             image_count, images_missing_alt = _image_alt_stats(tree)
+            has_viewport = _has_meta(tree, "viewport")
+            has_lang = _has_lang(tree)
+            has_charset = _has_charset(tree)
 
             page = ExtractedPage(
                 page_id=page_id,
@@ -57,6 +60,9 @@ class SeoExtractionPipeline:
                 content_hash=content_hash_for_text(visible_text),
                 image_count=image_count,
                 images_missing_alt=images_missing_alt,
+                has_viewport=has_viewport,
+                has_lang=has_lang,
+                has_charset=has_charset,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -133,6 +139,29 @@ def _image_alt_stats(tree):
     images = tree.css("img")
     missing = sum(1 for image in images if "alt" not in image.attributes)
     return len(images), missing
+
+
+def _has_meta(tree, name):
+    node = tree.css_first(f'meta[name="{name}"]')
+    if node is None:
+        node = tree.css_first(f'meta[name="{name.capitalize()}"]')
+    return node is not None
+
+
+def _has_lang(tree):
+    node = tree.css_first("html")
+    lang = node.attributes.get("lang") if node is not None else None
+    return bool(lang and lang.strip())
+
+
+def _has_charset(tree):
+    if tree.css_first("meta[charset]") is not None:
+        return True
+    node = tree.css_first('meta[http-equiv="Content-Type"]')
+    if node is None:
+        node = tree.css_first('meta[http-equiv="content-type"]')
+    content = (node.attributes.get("content") or "") if node is not None else ""
+    return "charset" in content.lower()
 
 
 def _visible_text(tree):

@@ -81,6 +81,35 @@ def test_extraction_pipeline_counts_images_missing_alt():
     assert page.images_missing_alt == 1
 
 
+def test_extraction_pipeline_detects_head_meta_presence():
+    crawl_id, page_id = _ids()
+    present = b"""
+    <html lang="en"><head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head><body>Hi</body></html>
+    """
+    absent = b"<html><head></head><body>Hi</body></html>"
+
+    with_meta = (
+        SeoExtractionPipeline().extract(_fetch(present), crawl_id, page_id)
+    ).extraction_result.page
+    without_meta = (
+        SeoExtractionPipeline().extract(_fetch(absent), crawl_id, page_id)
+    ).extraction_result.page
+
+    assert (with_meta.has_viewport, with_meta.has_lang, with_meta.has_charset) == (
+        True,
+        True,
+        True,
+    )
+    assert (
+        without_meta.has_viewport,
+        without_meta.has_lang,
+        without_meta.has_charset,
+    ) == (False, False, False)
+
+
 def test_extraction_pipeline_returns_error_for_non_html_success():
     crawl_id, page_id = _ids()
 

@@ -40,6 +40,9 @@ class IssueSeverityPolicy:
             IssueType.NOINDEX_PAGE: IssueSeverity.MEDIUM,
             IssueType.INSECURE_INTERNAL_LINK: IssueSeverity.MEDIUM,
             IssueType.IMAGES_MISSING_ALT: IssueSeverity.LOW,
+            IssueType.MISSING_VIEWPORT: IssueSeverity.MEDIUM,
+            IssueType.MISSING_LANG: IssueSeverity.LOW,
+            IssueType.MISSING_CHARSET: IssueSeverity.LOW,
         }
     )
 

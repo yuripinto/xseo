@@ -122,12 +122,22 @@ def test_migration_adds_image_columns_to_legacy_pages_table():
     _apply_column_migrations(conn)  # idempotent: running again is a no-op
 
     columns = {row["name"] for row in conn.execute("PRAGMA table_info(pages)")}
-    assert {"image_count", "images_missing_alt"} <= columns
+    assert {
+        "image_count",
+        "images_missing_alt",
+        "has_viewport",
+        "has_lang",
+        "has_charset",
+    } <= columns
     legacy_row = conn.execute(
-        "SELECT image_count, images_missing_alt FROM pages WHERE page_id = 'p1'"
+        "SELECT image_count, images_missing_alt, has_viewport, has_lang, has_charset "
+        "FROM pages WHERE page_id = 'p1'"
     ).fetchone()
     assert legacy_row["image_count"] == 0
     assert legacy_row["images_missing_alt"] == 0
+    assert legacy_row["has_viewport"] == 0
+    assert legacy_row["has_lang"] == 0
+    assert legacy_row["has_charset"] == 0
 
 
 def test_crawl_round_trip_and_recent_selection():
