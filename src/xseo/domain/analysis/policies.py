@@ -16,6 +16,7 @@ class ThresholdPolicy:
     thin_content_min_words: int = 200
     page_size_max_bytes: int = 2_000_000
     max_links_per_page: int = 300
+    max_crawl_depth: int = 4
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class IssueSeverityPolicy:
             IssueType.CANONICAL_TO_REDIRECT: IssueSeverity.MEDIUM,
             IssueType.CANONICAL_CROSS_DOMAIN: IssueSeverity.MEDIUM,
             IssueType.THIN_CONTENT: IssueSeverity.LOW,
+            IssueType.PAGE_TOO_DEEP: IssueSeverity.LOW,
             IssueType.EXACT_DUPLICATE: IssueSeverity.MEDIUM,
             IssueType.PAGE_TOO_LARGE: IssueSeverity.LOW,
             IssueType.NOINDEX_PAGE: IssueSeverity.MEDIUM,

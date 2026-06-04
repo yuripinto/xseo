@@ -25,7 +25,7 @@ from xseo.domain.frontier.results import FrontierSnapshot
 
 
 class LinkDiscoveryPort(Protocol):
-    def discover_links(self, fetch_result: FetchResult): ...
+    def discover_links(self, fetch_result: FetchResult, depth: int = 0): ...
 
 
 @dataclass(frozen=True)
@@ -139,7 +139,7 @@ class UrlCrawlEngine:
     def _discover_and_queue(self, crawl, frontier, entry, fetch_result):
         if self.link_discovery is None:
             return
-        for candidate in self.link_discovery.discover_links(fetch_result):
+        for candidate in self.link_discovery.discover_links(fetch_result, entry.depth):
             href = getattr(candidate, "raw_href", candidate)
             normalized = self.normalizer.normalize_discovered(href, entry.url)
             if not normalized.ok:

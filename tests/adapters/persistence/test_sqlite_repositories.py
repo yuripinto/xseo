@@ -128,7 +128,12 @@ def test_migration_adds_image_columns_to_legacy_pages_table():
         "has_viewport",
         "has_lang",
         "has_charset",
+        "depth",
     } <= columns
+    assert (
+        conn.execute("SELECT depth FROM pages WHERE page_id = 'p1'").fetchone()["depth"]
+        == 0
+    )
     legacy_row = conn.execute(
         "SELECT image_count, images_missing_alt, has_viewport, has_lang, has_charset "
         "FROM pages WHERE page_id = 'p1'"
@@ -184,6 +189,20 @@ def test_page_related_data_and_detail_round_trip():
     assert detail.outlinks == (link,)
     assert detail.redirects == (redirect,)
     assert detail.content_hash == saved_page.content_hash
+
+
+def test_page_depth_round_trips_through_persistence():
+    from dataclasses import replace
+
+    conn = connection()
+    SQLiteCrawlRepository(conn).save_crawl(crawl())
+    data_repo = SQLiteCrawlDataRepository(conn)
+    deep_page = replace(page(), depth=3)
+
+    data_repo.save_page(deep_page)
+    loaded = data_repo.load_analysis_data(deep_page.crawl_id).pages[0]
+
+    assert loaded.depth == 3
 
 
 def test_issue_and_duplicate_group_reads_are_deterministic():

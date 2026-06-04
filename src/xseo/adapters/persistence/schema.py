@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS pages (
     has_structured_data INTEGER NOT NULL DEFAULT 0,
     mixed_content_count INTEGER NOT NULL DEFAULT 0,
     has_hreflang INTEGER NOT NULL DEFAULT 0,
-    hreflang_self_referential INTEGER NOT NULL DEFAULT 1
+    hreflang_self_referential INTEGER NOT NULL DEFAULT 1,
+    depth INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -163,5 +164,9 @@ PAGE_COLUMN_MIGRATIONS = (
     (
         "hreflang_self_referential",
         "ALTER TABLE pages ADD COLUMN hreflang_self_referential INTEGER NOT NULL DEFAULT 1",
+    ),
+    (
+        "depth",
+        "ALTER TABLE pages ADD COLUMN depth INTEGER NOT NULL DEFAULT 0",
     ),
 )

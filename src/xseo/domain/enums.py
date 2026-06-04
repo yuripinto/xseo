@@ -47,6 +47,7 @@ class IssueType(StrEnum):
     CANONICAL_TO_REDIRECT = "canonical_to_redirect"
     CANONICAL_CROSS_DOMAIN = "canonical_cross_domain"
     THIN_CONTENT = "thin_content"
+    PAGE_TOO_DEEP = "page_too_deep"
     EXACT_DUPLICATE = "exact_duplicate"
     PAGE_TOO_LARGE = "page_too_large"
     NOINDEX_PAGE = "noindex_page"
