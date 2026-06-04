@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/yuripinto/xseo/compare/v0.4.0...v0.5.0) (2026-06-04)
+
+
+### Features
+
+* add HTML and SARIF report formats, a crawl-diff command, and a GitHub Action ([#14](https://github.com/yuripinto/xseo/issues/14)) ([9b3d6e0](https://github.com/yuripinto/xseo/commit/9b3d6e032d87060255c6125cf8f95e523eb7e7a7))
+* detect mixed content, missing Open Graph, and missing structured data ([#15](https://github.com/yuripinto/xseo/issues/15)) ([b711493](https://github.com/yuripinto/xseo/commit/b711493934a5422e8543b96c84bbb5d54bd49224))
+
+
+### Documentation
+
+* lead with both desktop and CLI in the README intro ([#16](https://github.com/yuripinto/xseo/issues/16)) ([da30f52](https://github.com/yuripinto/xseo/commit/da30f528089e2eb8e79b2eec2a8394d5bab5c544))
+
 ## [0.4.0](https://github.com/yuripinto/xseo/compare/v0.3.0...v0.4.0) (2026-06-04)
 
 
