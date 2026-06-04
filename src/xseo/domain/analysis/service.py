@@ -6,6 +6,7 @@ from xseo.domain.analysis.cross_page_detectors import detect_cross_page_issues
 from xseo.domain.analysis.link_detectors import (
     detect_insecure_link_issues,
     detect_link_issues,
+    detect_redirect_chain_issues,
 )
 from xseo.domain.analysis.page_detectors import detect_page_issues
 from xseo.domain.analysis.policies import DEFAULT_SEVERITY_POLICY, DEFAULT_THRESHOLDS
@@ -18,7 +19,15 @@ class IssueAnalysisService:
         self.thresholds = thresholds
         self.severity_policy = severity_policy
 
-    def detect_issues(self, crawl_id, pages, headings=(), link_statuses=(), links=()):
+    def detect_issues(
+        self,
+        crawl_id,
+        pages,
+        headings=(),
+        link_statuses=(),
+        links=(),
+        redirects=(),
+    ):
         seen = set()
         issues = []
 
@@ -44,6 +53,13 @@ class IssueAnalysisService:
                 issues.append(issue)
 
         for issue in detect_insecure_link_issues(pages, links, self.severity_policy):
+            if issue.issue_id.value not in seen:
+                seen.add(issue.issue_id.value)
+                issues.append(issue)
+
+        for issue in detect_redirect_chain_issues(
+            crawl_id, redirects, self.severity_policy
+        ):
             if issue.issue_id.value not in seen:
                 seen.add(issue.issue_id.value)
                 issues.append(issue)

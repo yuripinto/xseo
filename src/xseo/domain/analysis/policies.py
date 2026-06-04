@@ -23,6 +23,8 @@ class IssueSeverityPolicy:
         default_factory=lambda: {
             IssueType.BROKEN_INTERNAL_LINK: IssueSeverity.HIGH,
             IssueType.REDIRECTING_URL: IssueSeverity.LOW,
+            IssueType.REDIRECT_CHAIN: IssueSeverity.MEDIUM,
+            IssueType.REDIRECT_LOOP: IssueSeverity.HIGH,
             IssueType.TITLE_MISSING: IssueSeverity.MEDIUM,
             IssueType.TITLE_DUPLICATE: IssueSeverity.MEDIUM,
             IssueType.TITLE_TOO_SHORT: IssueSeverity.LOW,

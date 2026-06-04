@@ -53,6 +53,93 @@ def detect_link_issues(crawl_id, records, severity_policy=DEFAULT_SEVERITY_POLIC
     return tuple(issues)
 
 
+def detect_redirect_chain_issues(
+    crawl_id, redirects, severity_policy=DEFAULT_SEVERITY_POLICY
+):
+    """Flag multi-hop redirect chains and redirect loops.
+
+    A single ``A -> B`` hop is already covered by ``redirecting_url``. This walks
+    the redirect graph and reports:
+
+    - ``redirect_chain`` when following a URL takes two or more hops before
+      landing on a final destination (wastes crawl budget and dilutes ranking).
+    - ``redirect_loop`` when the hops cycle back on themselves (the URL never
+      resolves).
+    """
+    edges = {}
+    url_objs = {}
+    for redirect in redirects:
+        source = redirect.from_url.value
+        url_objs.setdefault(source, redirect.from_url)
+        url_objs.setdefault(redirect.to_url.value, redirect.to_url)
+        # Keep the first edge per source for deterministic traversal.
+        edges.setdefault(source, redirect.to_url.value)
+    if not edges:
+        return ()
+
+    targets = set(edges.values())
+    visited_sources = set()
+
+    def trace(start):
+        path = [start]
+        seen = {start}
+        node = start
+        while node in edges:
+            visited_sources.add(node)
+            nxt = edges[node]
+            path.append(nxt)
+            if nxt in seen:
+                return path, True
+            seen.add(nxt)
+            node = nxt
+        return path, False
+
+    issues = []
+
+    def emit(start, path, looped):
+        arrow = " → ".join(path)
+        if looped:
+            issues.append(
+                build_issue(
+                    crawl_id,
+                    None,
+                    url_objs[start],
+                    IssueType.REDIRECT_LOOP,
+                    f"Redirect loop never resolves: {arrow}.",
+                    severity_policy,
+                    discriminator=path[-1],
+                    key_subject=url_objs[start],
+                )
+            )
+        elif len(path) - 1 >= 2:
+            issues.append(
+                build_issue(
+                    crawl_id,
+                    None,
+                    url_objs[start],
+                    IssueType.REDIRECT_CHAIN,
+                    f"Redirect chain takes {len(path) - 1} hops: {arrow}.",
+                    severity_policy,
+                    discriminator=path[-1],
+                    key_subject=url_objs[start],
+                )
+            )
+
+    # Chain heads: sources no other redirect points at — the real entry points.
+    for head in sorted(source for source in edges if source not in targets):
+        path, looped = trace(head)
+        emit(head, path, looped)
+
+    # Pure cycles have no head (every node is a target); walk whatever is left.
+    for start in sorted(edges):
+        if start in visited_sources:
+            continue
+        path, looped = trace(start)
+        emit(start, path, looped)
+
+    return tuple(issues)
+
+
 def detect_insecure_link_issues(pages, links, severity_policy=DEFAULT_SEVERITY_POLICY):
     secure_pages = {
         page.page_id.value: page for page in pages if _is_https(page.final_url)
