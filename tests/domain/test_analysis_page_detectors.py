@@ -217,6 +217,27 @@ def test_page_with_all_images_described_is_clean():
     assert IssueType.IMAGES_MISSING_ALT not in _issue_types(issues)
 
 
+def test_detects_images_missing_dimensions():
+    page = _page(image_count=5, images_missing_dimensions=3)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.IMAGES_MISSING_DIMENSIONS in _issue_types(issues)
+    issue = next(
+        i for i in issues if i.issue_type == IssueType.IMAGES_MISSING_DIMENSIONS
+    )
+    assert issue.severity == IssueSeverity.LOW
+    assert "3 of 5" in issue.explanation
+
+
+def test_page_with_all_images_sized_is_clean():
+    page = _page(image_count=4, images_missing_dimensions=0)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.IMAGES_MISSING_DIMENSIONS not in _issue_types(issues)
+
+
 def test_detects_missing_head_meta():
     page = _page(has_viewport=False, has_lang=False, has_charset=False)
 

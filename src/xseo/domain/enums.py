@@ -57,6 +57,7 @@ class IssueType(StrEnum):
     INTERNAL_LINK_NOFOLLOW = "internal_link_nofollow"
     EXCESSIVE_LINKS = "excessive_links"
     IMAGES_MISSING_ALT = "images_missing_alt"
+    IMAGES_MISSING_DIMENSIONS = "images_missing_dimensions"
     MISSING_VIEWPORT = "missing_viewport"
     MISSING_LANG = "missing_lang"
     MISSING_CHARSET = "missing_charset"

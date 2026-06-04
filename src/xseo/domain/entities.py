@@ -193,6 +193,7 @@ class ExtractedPage:
     has_hreflang: bool = False
     hreflang_self_referential: bool = True
     depth: int = 0
+    images_missing_dimensions: int = 0
 
 
 @dataclass(frozen=True)

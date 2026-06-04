@@ -54,6 +54,7 @@ class IssueSeverityPolicy:
             IssueType.INTERNAL_LINK_NOFOLLOW: IssueSeverity.LOW,
             IssueType.EXCESSIVE_LINKS: IssueSeverity.LOW,
             IssueType.IMAGES_MISSING_ALT: IssueSeverity.LOW,
+            IssueType.IMAGES_MISSING_DIMENSIONS: IssueSeverity.LOW,
             IssueType.MISSING_VIEWPORT: IssueSeverity.MEDIUM,
             IssueType.MISSING_LANG: IssueSeverity.LOW,
             IssueType.MISSING_CHARSET: IssueSeverity.LOW,

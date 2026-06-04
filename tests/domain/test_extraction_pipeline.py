@@ -81,6 +81,25 @@ def test_extraction_pipeline_counts_images_missing_alt():
     assert page.images_missing_alt == 1
 
 
+def test_extraction_pipeline_counts_images_missing_dimensions():
+    crawl_id, page_id = _ids()
+    html = b"""
+    <html><body>
+      <img src="/sized.png" width="200" height="100" alt="sized">
+      <img src="/width-only.png" width="200" alt="partial">
+      <img src="/none.png" alt="none">
+      <img src="/empty.png" width="" height="" alt="empty">
+    </body></html>
+    """
+
+    output = SeoExtractionPipeline().extract(_fetch(html), crawl_id, page_id)
+
+    page = output.extraction_result.page
+    assert page.image_count == 4
+    # Only the fully-sized image is exempt; the other three lack a usable dimension.
+    assert page.images_missing_dimensions == 3
+
+
 def test_extraction_pipeline_detects_head_meta_presence():
     crawl_id, page_id = _ids()
     present = b"""
