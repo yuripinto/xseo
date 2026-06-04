@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/yuripinto/xseo/compare/v0.6.0...v0.7.0) (2026-06-04)
+
+
+### Features
+
+* detect canonicals pointing to noindex, redirect, or cross-domain ([#26](https://github.com/yuripinto/xseo/issues/26)) ([b76aee6](https://github.com/yuripinto/xseo/commit/b76aee6214afec79b4f0508015a8475cbb08e4c1))
+* detect images without explicit width/height (layout shift) ([#32](https://github.com/yuripinto/xseo/issues/32)) ([ba58c03](https://github.com/yuripinto/xseo/commit/ba58c0300460c9391fe3d61004034eacd76f97b8))
+* detect invalid hreflang language codes ([#34](https://github.com/yuripinto/xseo/issues/34)) ([0d6f8c2](https://github.com/yuripinto/xseo/commit/0d6f8c2a5b413ae4dbe6cb4d20fd02702e06a00e))
+* detect malformed JSON-LD structured data ([#33](https://github.com/yuripinto/xseo/issues/33)) ([a9b2f3c](https://github.com/yuripinto/xseo/commit/a9b2f3cd80dae25c73a8376bfca475ade4cb2687))
+* detect multi-hop redirect chains and redirect loops ([#24](https://github.com/yuripinto/xseo/issues/24)) ([2b5241f](https://github.com/yuripinto/xseo/commit/2b5241fe25b8c12889281566440549db07968fdb))
+* detect nofollow internal links and excessive links per page ([#30](https://github.com/yuripinto/xseo/issues/30)) ([e4f21dd](https://github.com/yuripinto/xseo/commit/e4f21dd91aaf5ed703878749efece8b8fcc2aec9))
+* detect orphan pages listed in the sitemap but never crawled ([#28](https://github.com/yuripinto/xseo/issues/28)) ([9b7302a](https://github.com/yuripinto/xseo/commit/9b7302a7e1236eaeb292974e77be0ebda63f4175))
+* detect pages too deep in the crawl tree ([#29](https://github.com/yuripinto/xseo/issues/29)) ([58649e2](https://github.com/yuripinto/xseo/commit/58649e274bd51e7d9f0d56f3e1d6e59b0f3292c2))
+* detect stale sitemap URLs that redirect, error, or are noindex ([#27](https://github.com/yuripinto/xseo/issues/27)) ([53f67a8](https://github.com/yuripinto/xseo/commit/53f67a828511fcb4c5fd2a3be008b64eceda18d3))
+* flag titles and meta descriptions too wide for the SERP ([#31](https://github.com/yuripinto/xseo/issues/31)) ([0eb0182](https://github.com/yuripinto/xseo/commit/0eb018286cb5e3661255b4c79c171b31f8205831))
+
+
+### Documentation
+
+* use absolute image URLs so they render on PyPI ([337553e](https://github.com/yuripinto/xseo/commit/337553e01c9ae0a6497de8ab10475b7154653a47))
+
 ## [0.6.0](https://github.com/yuripinto/xseo/compare/v0.5.0...v0.6.0) (2026-06-04)
 
 
