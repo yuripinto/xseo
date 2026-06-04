@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 
 from xseo.domain.analysis.issues import build_issue
-from xseo.domain.analysis.policies import DEFAULT_SEVERITY_POLICY
+from xseo.domain.analysis.policies import DEFAULT_SEVERITY_POLICY, DEFAULT_THRESHOLDS
 from xseo.domain.enums import IssueType, LinkRelation
 
 
@@ -161,6 +162,77 @@ def detect_insecure_link_issues(pages, links, severity_policy=DEFAULT_SEVERITY_P
                 severity_policy,
                 discriminator=link.target_url.value,
                 key_subject=source.page_id,
+            )
+        )
+    return tuple(issues)
+
+
+def detect_nofollow_internal_link_issues(
+    pages, links, severity_policy=DEFAULT_SEVERITY_POLICY
+):
+    """Flag pages that nofollow their own internal links.
+
+    ``rel="nofollow"`` on an internal link tells crawlers not to pass ranking
+    signal through it — almost never what you want between your own pages, since
+    it wastes internal link equity.
+    """
+    pages_by_id = {page.page_id.value: page for page in pages}
+    counts = defaultdict(int)
+    for link in links:
+        if link.relation == LinkRelation.INTERNAL and link.nofollow:
+            counts[link.source_page_id.value] += 1
+
+    issues = []
+    for page_id_value in sorted(counts):
+        page = pages_by_id.get(page_id_value)
+        if page is None:
+            continue
+        count = counts[page_id_value]
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.INTERNAL_LINK_NOFOLLOW,
+                f"{count} internal link(s) use rel=nofollow, which wastes internal "
+                "link equity.",
+                severity_policy,
+                key_subject=page.page_id,
+            )
+        )
+    return tuple(issues)
+
+
+def detect_excessive_link_issues(
+    pages,
+    links,
+    thresholds=DEFAULT_THRESHOLDS,
+    severity_policy=DEFAULT_SEVERITY_POLICY,
+):
+    """Flag pages with an unusually high number of links (link dilution)."""
+    pages_by_id = {page.page_id.value: page for page in pages}
+    counts = defaultdict(int)
+    for link in links:
+        counts[link.source_page_id.value] += 1
+
+    issues = []
+    for page_id_value in sorted(counts):
+        count = counts[page_id_value]
+        if count <= thresholds.max_links_per_page:
+            continue
+        page = pages_by_id.get(page_id_value)
+        if page is None:
+            continue
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.EXCESSIVE_LINKS,
+                f"Page has {count} links (more than {thresholds.max_links_per_page}); "
+                "this dilutes the value each link passes.",
+                severity_policy,
+                key_subject=page.page_id,
             )
         )
     return tuple(issues)

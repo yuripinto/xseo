@@ -12,8 +12,10 @@ from xseo.domain.analysis.keys import (
 )
 from xseo.domain.analysis.link_detectors import (
     LinkStatusRecord,
+    detect_excessive_link_issues,
     detect_insecure_link_issues,
     detect_link_issues,
+    detect_nofollow_internal_link_issues,
     detect_redirect_chain_issues,
 )
 from xseo.domain.analysis.page_detectors import detect_page_issues
@@ -35,8 +37,10 @@ __all__ = [
     "detect_cross_page_issues",
     "detect_duplicate_meta_description_issues",
     "detect_duplicate_title_issues",
+    "detect_excessive_link_issues",
     "detect_insecure_link_issues",
     "detect_link_issues",
+    "detect_nofollow_internal_link_issues",
     "detect_page_issues",
     "detect_redirect_chain_issues",
     "duplicate_group_key",
