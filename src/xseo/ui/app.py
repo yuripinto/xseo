@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import sys
 import traceback
-from datetime import UTC, datetime
-from pathlib import Path
 
 from PySide6.QtWidgets import (
     QApplication,
@@ -16,38 +14,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from xseo.adapters.background import ThreadedBackgroundExecution
-from xseo.adapters.crawl_processor import PageProcessorLinkDiscovery
-from xseo.adapters.event_bridge import DomainToAppEventBridge
-from xseo.adapters.export import CsvExportAdapter
-from xseo.adapters.http import (
-    AllowAllRobotsPolicy,
-    RobotsTxtPolicy,
-    SyncHttpFetchAdapter,
-    httpx_robots_fetcher,
-)
-from xseo.adapters.persistence import (
-    SQLiteAnalysisRepository,
-    SQLiteCrawlDataRepository,
-    SQLiteCrawlRepository,
-    SQLiteDatabase,
-    SQLiteExportRepository,
-    SQLiteResultsReadRepository,
-)
 from xseo.application.commands import PageDetailQuery
 from xseo.application.events import CrawlProgressEvent, CrawlProgressEventKind
-from xseo.application.services import (
-    ExportApplicationService,
-    ResultsApplicationService,
-)
-from xseo.application.services.active_crawls import ActiveCrawlRegistry
-from xseo.application.services.crawl_execution import CrawlExecutionCoordinator
-from xseo.application.services.crawl_service import CrawlApplicationService
+from xseo.application.services import ResultsApplicationService
 from xseo.application.services.event_delivery import EventDeliveryService
-from xseo.domain.analysis import IssueAnalysisService
-from xseo.domain.crawler import UrlCrawlEngine
-from xseo.domain.duplicates import detect_duplicate_groups
-from xseo.domain.extraction.pipeline import SeoExtractionPipeline
+from xseo.composition import build_services
 from xseo.ui.bridge import EventBridge
 from xseo.ui.desktop import XseoDesktopController
 from xseo.ui.widgets.control_panel import ControlPanel
@@ -56,81 +27,6 @@ from xseo.ui.widgets.issues_tab import IssuesTab
 from xseo.ui.widgets.page_detail import PageDetailDialog
 from xseo.ui.widgets.pages_tab import PagesTab
 from xseo.ui.widgets.progress_tab import ProgressTab
-
-_DEFAULT_DB = Path.home() / ".xseo" / "xseo.sqlite3"
-
-
-class _SystemClock:
-    def now(self) -> datetime:
-        return datetime.now(UTC)
-
-
-def build_services(
-    db_path: Path | str = _DEFAULT_DB,
-) -> tuple[XseoDesktopController, ResultsApplicationService, EventDeliveryService]:
-    """Wire all adapters and services. Returns (controller, results_service, event_delivery)."""
-    db = SQLiteDatabase(str(db_path)).initialize()
-    conn = db.connect()
-
-    crawl_repo = SQLiteCrawlRepository(conn)
-    data_repo = SQLiteCrawlDataRepository(conn)
-    analysis_repo = SQLiteAnalysisRepository(conn)
-    read_repo = SQLiteResultsReadRepository(conn)
-    export_repo = SQLiteExportRepository(conn)
-
-    csv_adapter = CsvExportAdapter()
-    export_svc = ExportApplicationService(read_repo, csv_adapter, export_repo)
-    event_delivery = EventDeliveryService()
-    active_crawls = ActiveCrawlRegistry()
-    bg_execution = ThreadedBackgroundExecution()
-    clock = _SystemClock()
-
-    def work_factory(crawl: object) -> object:
-        bridge = DomainToAppEventBridge(event_delivery, crawl.crawl_id, clock)
-        processor = PageProcessorLinkDiscovery(
-            SeoExtractionPipeline(), data_repo, crawl.crawl_id
-        )
-        if crawl.config.respect_robots:
-            robots_policy = RobotsTxtPolicy(
-                httpx_robots_fetcher(crawl.config.timeout_seconds)
-            )
-        else:
-            robots_policy = AllowAllRobotsPolicy()
-        engine = UrlCrawlEngine(
-            fetch_port=SyncHttpFetchAdapter(),
-            event_publisher=bridge,
-            clock=clock,
-            link_discovery=processor,
-            robots_policy=robots_policy,
-            request_delay_seconds=crawl.config.request_delay_seconds,
-        )
-        coordinator = CrawlExecutionCoordinator(
-            crawl_engine=engine,
-            issue_analysis_service=IssueAnalysisService(),
-            duplicate_detector=detect_duplicate_groups,
-            crawl_data_repository=data_repo,
-            analysis_repository=analysis_repo,
-            event_delivery=event_delivery,
-            clock=clock,
-        )
-
-        def work(stop_token: object) -> object:
-            return coordinator.run(crawl, stop_token=stop_token)
-
-        return work
-
-    crawl_svc = CrawlApplicationService(
-        crawl_repo,
-        bg_execution,
-        active_crawls,
-        event_delivery,
-        clock,
-        work_factory=work_factory,
-    )
-    results_svc = ResultsApplicationService(read_repo)
-    controller = XseoDesktopController(crawl_svc, results_svc, export_svc)
-
-    return controller, results_svc, event_delivery
 
 
 class MainWindow(QMainWindow):
