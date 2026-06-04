@@ -150,6 +150,33 @@ def test_extraction_pipeline_detects_open_graph_and_structured_data():
     assert (bare_page.has_open_graph, bare_page.has_structured_data) == (False, False)
 
 
+def test_extraction_pipeline_flags_invalid_structured_data():
+    crawl_id, page_id = _ids()
+    broken = b"""
+    <html><head>
+      <script type="application/ld+json">{"@type": "Article",}</script>
+    </head><body>Hi</body></html>
+    """
+    valid = b"""
+    <html><head>
+      <script type="application/ld+json">
+        {"@context": "https://schema.org", "@type": "Article"}
+      </script>
+    </head><body>Hi</body></html>
+    """
+
+    broken_page = (
+        SeoExtractionPipeline().extract(_fetch(broken), crawl_id, page_id)
+    ).extraction_result.page
+    valid_page = (
+        SeoExtractionPipeline().extract(_fetch(valid), crawl_id, page_id)
+    ).extraction_result.page
+
+    assert broken_page.has_structured_data is True
+    assert broken_page.structured_data_invalid is True
+    assert valid_page.structured_data_invalid is False
+
+
 def test_extraction_pipeline_counts_mixed_content_only_on_https():
     crawl_id, page_id = _ids()
     body = b"""

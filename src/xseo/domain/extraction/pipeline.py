@@ -10,6 +10,7 @@ from xseo.domain.errors import DomainError
 from xseo.domain.extraction.hashing import content_hash_for_text
 from xseo.domain.extraction.links import extract_raw_links
 from xseo.domain.extraction.results import SeoExtractionOutput
+from xseo.domain.extraction.structured_data import has_invalid_structured_data
 from xseo.domain.extraction.text import normalize_visible_text, word_count
 from xseo.domain.frontier import UrlNormalizer
 from xseo.domain.value_objects import WordCount
@@ -45,7 +46,11 @@ class SeoExtractionPipeline:
             has_lang = _has_lang(tree)
             has_charset = _has_charset(tree)
             has_open_graph = _has_open_graph(tree)
-            has_structured_data = _has_structured_data(tree)
+            structured_data_blocks = _structured_data_blocks(tree)
+            has_structured_data = bool(structured_data_blocks)
+            structured_data_invalid = has_invalid_structured_data(
+                structured_data_blocks
+            )
             mixed_content_count = _mixed_content_count(tree, final_url)
             has_hreflang, hreflang_self_referential = _hreflang_stats(
                 tree, final_url, self.normalizer
@@ -79,6 +84,7 @@ class SeoExtractionPipeline:
                 has_hreflang=has_hreflang,
                 hreflang_self_referential=hreflang_self_referential,
                 images_missing_dimensions=images_missing_dimensions,
+                structured_data_invalid=structured_data_invalid,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -221,10 +227,11 @@ def _has_open_graph(tree):
     return tree.css_first('meta[property="og:title"]') is not None
 
 
-def _has_structured_data(tree):
+def _structured_data_blocks(tree):
     # JSON-LD is the dominant structured-data format; microdata is rarer and
-    # noisier to detect, so we treat a JSON-LD block as the signal.
-    return tree.css_first('script[type="application/ld+json"]') is not None
+    # noisier to detect, so we treat JSON-LD blocks as the signal. Returning the
+    # raw block text lets the validator inspect them, not just count them.
+    return [node.text() for node in tree.css('script[type="application/ld+json"]')]
 
 
 # Sub-resource references that load content into the page; an http:// URL here

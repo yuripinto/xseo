@@ -61,6 +61,7 @@ class IssueSeverityPolicy:
             IssueType.MIXED_CONTENT: IssueSeverity.HIGH,
             IssueType.OPEN_GRAPH_MISSING: IssueSeverity.LOW,
             IssueType.STRUCTURED_DATA_MISSING: IssueSeverity.LOW,
+            IssueType.STRUCTURED_DATA_INVALID: IssueSeverity.MEDIUM,
             IssueType.HREFLANG_NO_SELF_REFERENCE: IssueSeverity.MEDIUM,
             IssueType.SITEMAP_MISSING: IssueSeverity.LOW,
             IssueType.PAGE_MISSING_FROM_SITEMAP: IssueSeverity.LOW,
