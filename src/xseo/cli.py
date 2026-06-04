@@ -10,13 +10,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import UTC, datetime
 from pathlib import Path
 
+from xseo import reporting
 from xseo.composition import build_services
 
 # Ordered low -> high so a "--fail-on" threshold can compare severities.
-_SEVERITY_RANK = {"low": 0, "medium": 1, "high": 2}
+_SEVERITY_RANK = reporting.SEVERITY_RANK
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -24,6 +24,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "crawl":
         return _run_crawl(args)
+    if args.command == "diff":
+        return _run_diff(args)
     parser.print_help()
     return 2
 
@@ -67,7 +69,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     crawl.add_argument(
         "--format",
-        choices=("json", "csv"),
+        choices=("json", "csv", "html", "sarif"),
         default="json",
         help="Report format for --out (default: json).",
     )
@@ -81,6 +83,24 @@ def _build_parser() -> argparse.ArgumentParser:
         "--db",
         metavar="PATH",
         help="SQLite database path (default: ~/.xseo/xseo.sqlite3).",
+    )
+
+    diff = sub.add_parser(
+        "diff",
+        help="Compare two JSON reports and show which issues are new or fixed.",
+    )
+    diff.add_argument("base", help="Baseline report (xseo crawl --out base.json).")
+    diff.add_argument("head", help="Newer report to compare against the baseline.")
+    diff.add_argument(
+        "--out",
+        metavar="FILE",
+        help="Write the diff as JSON to FILE ('-' writes to stdout).",
+    )
+    diff.add_argument(
+        "--fail-on-new",
+        choices=("none", "low", "medium", "high"),
+        default="none",
+        help="Exit non-zero if a new issue at or above this severity appears.",
     )
     return parser
 
@@ -176,8 +196,13 @@ def _write_report(services, state, args) -> None:
             raise RuntimeError(message)
         return
 
-    report = _build_report(state, args)
-    text = json.dumps(report, indent=2, ensure_ascii=False)
+    report = reporting.build_report(state, args.url)
+    renderers = {
+        "json": reporting.render_json,
+        "html": reporting.render_html,
+        "sarif": reporting.render_sarif,
+    }
+    text = renderers[args.format](report)
     if args.out == "-":
         sys.stdout.write(text + "\n")
     else:
@@ -185,53 +210,57 @@ def _write_report(services, state, args) -> None:
 
 
 def _build_report(state, args) -> dict:
-    by_severity: dict[str, int] = {}
-    by_type: dict[str, int] = {}
-    issues = []
-    for issue in state.issues:
-        severity = str(issue.severity)
-        issue_type = str(issue.issue_type)
-        by_severity[severity] = by_severity.get(severity, 0) + 1
-        by_type[issue_type] = by_type.get(issue_type, 0) + 1
-        issues.append(
-            {
-                "severity": severity,
-                "type": issue_type,
-                "url": _value(issue.affected_url),
-                "explanation": issue.explanation,
-            }
+    """Backward-compatible shim around :func:`reporting.build_report`."""
+    return reporting.build_report(state, args.url)
+
+
+def _run_diff(args: argparse.Namespace) -> int:
+    try:
+        base = json.loads(Path(args.base).read_text(encoding="utf-8"))
+        head = json.loads(Path(args.head).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"error: could not read report: {exc}", file=sys.stderr)
+        return 1
+
+    diff = reporting.diff_reports(base, head)
+    pipe_mode = args.out == "-"
+    summary_stream = sys.stderr if pipe_mode else sys.stdout
+
+    new = diff["new_issues"]
+    fixed = diff["fixed_issues"]
+    print(
+        f"\n{len(new)} new, {len(fixed)} fixed, {diff['unchanged']} unchanged "
+        f"({diff['base']['issues_found']} → {diff['head']['issues_found']} issues)",
+        file=summary_stream,
+    )
+    for issue in new:
+        print(
+            f"  + {issue['severity'].upper():<7} {issue['type']}", file=summary_stream
+        )
+    for issue in fixed:
+        print(
+            f"  - {issue['severity'].upper():<7} {issue['type']}", file=summary_stream
         )
 
-    pages = [
-        {
-            "url": _value(page.final_url) or _value(page.url),
-            "status_code": page.status_code,
-            "title": page.title,
-            "word_count": page.word_count,
-        }
-        for page in state.pages
-    ]
-    duplicates = [
-        {
-            "page_count": group.page_count,
-            "representative_url": _value(group.representative_url),
-        }
-        for group in state.duplicate_groups
-    ]
+    if args.out:
+        text = reporting.render_json(diff)
+        if pipe_mode:
+            sys.stdout.write(text + "\n")
+        else:
+            Path(args.out).write_text(text, encoding="utf-8")
 
-    return {
-        "crawl": {
-            "start_url": args.url,
-            "pages_crawled": len(state.pages),
-            "issues_found": len(state.issues),
-            "duplicate_groups": len(state.duplicate_groups),
-            "generated_at": datetime.now(UTC).isoformat(),
-        },
-        "summary": {"by_severity": by_severity, "by_type": by_type},
-        "issues": issues,
-        "pages": pages,
-        "duplicate_groups": duplicates,
-    }
+    return _exit_code(_DiffIssue.wrap(new), args.fail_on_new)
+
+
+class _DiffIssue:
+    """Adapt a diff issue dict to the ``.severity`` shape ``_exit_code`` expects."""
+
+    def __init__(self, severity: str) -> None:
+        self.severity = severity
+
+    @staticmethod
+    def wrap(issues: list[dict]) -> list[_DiffIssue]:
+        return [_DiffIssue(issue["severity"]) for issue in issues]
 
 
 def _exit_code(issues, fail_on: str) -> int:
@@ -242,13 +271,6 @@ def _exit_code(issues, fail_on: str) -> int:
         if _SEVERITY_RANK.get(str(issue.severity), 0) >= threshold:
             return 1
     return 0
-
-
-def _value(obj):
-    """Unwrap a value object (``.value``) to a plain string, preserving ``None``."""
-    if obj is None:
-        return None
-    return getattr(obj, "value", obj)
 
 
 if __name__ == "__main__":

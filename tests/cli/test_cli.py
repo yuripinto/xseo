@@ -115,6 +115,40 @@ def test_parser_defaults():
     assert args.no_robots is False
 
 
+def test_parser_diff_subcommand():
+    args = _build_parser().parse_args(["diff", "base.json", "head.json"])
+    assert args.command == "diff"
+    assert args.base == "base.json"
+    assert args.head == "head.json"
+    assert args.fail_on_new == "none"
+
+
+def test_diff_command_fails_on_new(tmp_path, capsys):
+    base = tmp_path / "base.json"
+    head = tmp_path / "head.json"
+    base.write_text(
+        json.dumps({"crawl": {"issues_found": 0}, "issues": []}), encoding="utf-8"
+    )
+    head.write_text(
+        json.dumps(
+            {
+                "crawl": {"issues_found": 1},
+                "issues": [
+                    {
+                        "severity": "high",
+                        "type": "broken_internal_link",
+                        "url": "https://example.com/x",
+                        "explanation": "broken",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert main(["diff", str(base), str(head), "--fail-on-new", "high"]) == 1
+    assert main(["diff", str(base), str(head), "--fail-on-new", "none"]) == 0
+
+
 # --- end to end ------------------------------------------------------------
 
 
@@ -153,6 +187,54 @@ def test_crawl_end_to_end_writes_report(tmp_path, live_site):
     assert report["crawl"]["pages_crawled"] >= 1
     assert report["crawl"]["start_url"] == live_site
     assert "by_severity" in report["summary"]
+
+
+def test_crawl_html_and_sarif_formats(tmp_path, live_site):
+    db = str(tmp_path / "cli.sqlite3")
+    html_path = tmp_path / "report.html"
+    sarif_path = tmp_path / "report.sarif"
+
+    assert (
+        main(
+            [
+                "crawl",
+                live_site,
+                "--db",
+                db,
+                "--no-robots",
+                "--delay",
+                "0",
+                "--format",
+                "html",
+                "--out",
+                str(html_path),
+            ]
+        )
+        == 0
+    )
+    assert html_path.read_text(encoding="utf-8").lstrip().startswith("<!doctype html>")
+
+    assert (
+        main(
+            [
+                "crawl",
+                live_site,
+                "--db",
+                db,
+                "--no-robots",
+                "--delay",
+                "0",
+                "--format",
+                "sarif",
+                "--out",
+                str(sarif_path),
+            ]
+        )
+        == 0
+    )
+    log = json.loads(sarif_path.read_text(encoding="utf-8"))
+    assert log["version"] == "2.1.0"
+    assert log["runs"][0]["tool"]["driver"]["name"] == "xseo"
 
 
 def test_crawl_fail_on_low_returns_nonzero(tmp_path, live_site):

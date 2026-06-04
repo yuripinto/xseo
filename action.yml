@@ -1,0 +1,66 @@
+name: "xseo SEO audit"
+description: "Crawl a site with xseo and gate the build on SEO regressions."
+branding:
+  icon: "search"
+  color: "blue"
+
+inputs:
+  url:
+    description: "Start URL to crawl, e.g. https://example.com/"
+    required: true
+  fail-on:
+    description: "Fail the job if an issue at or above this severity is found (none|low|medium|high)."
+    required: false
+    default: "none"
+  limit:
+    description: "Maximum number of pages to crawl."
+    required: false
+    default: "500"
+  format:
+    description: "Report format to write (json|html|sarif)."
+    required: false
+    default: "sarif"
+  output:
+    description: "Path to write the report to."
+    required: false
+    default: "xseo-report.sarif"
+  args:
+    description: "Extra raw arguments passed through to `xseo crawl`."
+    required: false
+    default: ""
+  version:
+    description: "Version of xseo to install from PyPI (defaults to the latest)."
+    required: false
+    default: ""
+
+outputs:
+  report:
+    description: "Path to the generated report."
+    value: ${{ inputs.output }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install xseo
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.version }}" ]; then
+          pip install "xseo==${{ inputs.version }}"
+        else
+          pip install xseo
+        fi
+
+    - name: Run xseo crawl
+      shell: bash
+      run: |
+        xseo crawl "${{ inputs.url }}" \
+          --limit "${{ inputs.limit }}" \
+          --format "${{ inputs.format }}" \
+          --out "${{ inputs.output }}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          ${{ inputs.args }}

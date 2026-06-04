@@ -20,7 +20,8 @@
 - **Issue detection** for missing/duplicate titles and descriptions, thin content, heading problems, broken links, and other common SEO defects.
 - **Duplicate content detection** through content hashing and grouped read models.
 - **Sortable result tables** for pages, issues, and duplicate groups, with a double-click page detail dialog.
-- **Headless CLI** (`xseo crawl <url>`) that runs the same engine without the GUI — JSON/CSV reports and a `--fail-on` exit code, so you can gate CI on SEO regressions.
+- **Headless CLI** (`xseo crawl <url>`) that runs the same engine without the GUI — JSON, CSV, HTML, and SARIF reports, an `xseo diff` to compare crawls, and a `--fail-on` exit code, so you can gate CI on SEO regressions.
+- **GitHub Action** that runs an audit on every push and uploads findings to the Security → Code scanning tab via SARIF.
 - **CSV export** for every result view, so you can pipe findings into spreadsheets or other tools.
 - **Local persistence** in SQLite at `~/.xseo/xseo.sqlite3`. The last crawl is restored automatically on launch.
 - **Clean architecture** — domain, application, and adapter layers are strictly separated, with ports/adapters for HTTP, persistence, export, and the UI.
@@ -120,12 +121,14 @@ Crawled 142 pages, found 38 issues
   LOW       22  thin_content
 ```
 
-Write a machine-readable report, or pipe JSON straight to another tool:
+Write a report in whichever format fits your workflow, or pipe JSON straight to another tool:
 
 ```bash
-xseo crawl https://example.com/ --out report.json      # full JSON report
-xseo crawl https://example.com/ --out - | jq '.summary' # JSON to stdout
-xseo crawl https://example.com/ --format csv --out issues.csv
+xseo crawl https://example.com/ --out report.json        # full JSON report
+xseo crawl https://example.com/ --out - | jq '.summary'  # JSON to stdout
+xseo crawl https://example.com/ --format csv  --out issues.csv
+xseo crawl https://example.com/ --format html --out report.html   # shareable, self-contained
+xseo crawl https://example.com/ --format sarif --out report.sarif # GitHub code scanning
 ```
 
 Use it as a build gate — `--fail-on` makes the command exit non-zero when an issue at or above the given severity is found, so a regression breaks CI:
@@ -134,7 +137,41 @@ Use it as a build gate — `--fail-on` makes the command exit non-zero when an i
 xseo crawl https://example.com/ --fail-on high
 ```
 
+Compare two crawls to see exactly what changed — which issues are new and which were fixed:
+
+```bash
+xseo crawl https://example.com/ --out before.json
+# … ship some changes …
+xseo crawl https://example.com/ --out after.json
+xseo diff before.json after.json --fail-on-new medium
+```
+
 Other flags: `--limit`, `--delay`, `--timeout`, `--no-robots`, `--all-hosts`, `--db`. Run `xseo crawl --help` for the full list.
+
+### GitHub Action
+
+Run an audit on every push and surface findings in the **Security → Code scanning** tab:
+
+```yaml
+# .github/workflows/seo.yml
+name: SEO audit
+on: [push]
+permissions:
+  security-events: write   # required to upload SARIF
+jobs:
+  seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: yuripinto/xseo@v1
+        id: xseo
+        with:
+          url: https://example.com/
+          fail-on: high          # break the build on high-severity issues
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: ${{ steps.xseo.outputs.report }}
+```
 
 ## Verify
 
@@ -143,7 +180,7 @@ python3 -m compileall src tests
 python3 -m pytest -q
 ```
 
-The current suite has 165 tests covering domain logic, adapters, integration, property-based invariants, CLI behavior, and UI smoke tests.
+The current suite has 172 tests covering domain logic, adapters, integration, property-based invariants, CLI behavior, report rendering, and UI smoke tests.
 
 ## Project layout
 
