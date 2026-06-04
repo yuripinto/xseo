@@ -1,10 +1,13 @@
 from tests.domain.test_analysis_page_detectors import _page
 from xseo.domain.analysis import (
     LinkStatusRecord,
+    detect_excessive_link_issues,
     detect_insecure_link_issues,
     detect_link_issues,
+    detect_nofollow_internal_link_issues,
     detect_redirect_chain_issues,
 )
+from xseo.domain.analysis.policies import ThresholdPolicy
 from xseo.domain.entities import PageLink, Redirect
 from xseo.domain.enums import IssueSeverity, IssueType, LinkRelation
 from xseo.domain.ids import CrawlId, PageId
@@ -163,3 +166,51 @@ def test_chain_leading_into_loop_is_reported_once():
 
 def test_no_redirects_yields_no_issues():
     assert detect_redirect_chain_issues(_id(CrawlId, "crawl-1"), ()) == ()
+
+
+def _link(page, target, relation=LinkRelation.INTERNAL, nofollow=False):
+    return PageLink(page.page_id, _url(target), relation, "anchor", nofollow)
+
+
+def test_flags_nofollow_internal_links():
+    page = _page(final_url=_url("https://example.com/page"))
+    links = (
+        _link(page, "https://example.com/a", nofollow=True),
+        _link(page, "https://example.com/b", nofollow=True),
+        _link(page, "https://example.com/c", nofollow=False),
+        _link(page, "https://other.com/x", LinkRelation.EXTERNAL, nofollow=True),
+    )
+
+    issues = detect_nofollow_internal_link_issues((page,), links)
+
+    assert [issue.issue_type for issue in issues] == [IssueType.INTERNAL_LINK_NOFOLLOW]
+    assert issues[0].severity == IssueSeverity.LOW
+    assert issues[0].page_id == page.page_id
+    assert "2 internal link(s)" in issues[0].explanation
+
+
+def test_no_nofollow_internal_links_yields_no_issue():
+    page = _page(final_url=_url("https://example.com/page"))
+    links = (_link(page, "https://example.com/a"),)
+
+    assert detect_nofollow_internal_link_issues((page,), links) == ()
+
+
+def test_flags_pages_with_excessive_links():
+    page = _page(final_url=_url("https://example.com/page"))
+    thresholds = ThresholdPolicy(max_links_per_page=2)
+    links = tuple(_link(page, f"https://example.com/{i}") for i in range(3))
+
+    issues = detect_excessive_link_issues((page,), links, thresholds)
+
+    assert [issue.issue_type for issue in issues] == [IssueType.EXCESSIVE_LINKS]
+    assert issues[0].severity == IssueSeverity.LOW
+    assert "3 links" in issues[0].explanation
+
+
+def test_link_count_at_threshold_is_not_flagged():
+    page = _page(final_url=_url("https://example.com/page"))
+    thresholds = ThresholdPolicy(max_links_per_page=3)
+    links = tuple(_link(page, f"https://example.com/{i}") for i in range(3))
+
+    assert detect_excessive_link_issues((page,), links, thresholds) == ()

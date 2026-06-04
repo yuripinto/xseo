@@ -48,6 +48,8 @@ class IssueType(StrEnum):
     PAGE_TOO_LARGE = "page_too_large"
     NOINDEX_PAGE = "noindex_page"
     INSECURE_INTERNAL_LINK = "insecure_internal_link"
+    INTERNAL_LINK_NOFOLLOW = "internal_link_nofollow"
+    EXCESSIVE_LINKS = "excessive_links"
     IMAGES_MISSING_ALT = "images_missing_alt"
     MISSING_VIEWPORT = "missing_viewport"
     MISSING_LANG = "missing_lang"
