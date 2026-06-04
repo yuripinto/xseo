@@ -54,6 +54,8 @@ class IssueType(StrEnum):
     OPEN_GRAPH_MISSING = "open_graph_missing"
     STRUCTURED_DATA_MISSING = "structured_data_missing"
     HREFLANG_NO_SELF_REFERENCE = "hreflang_no_self_reference"
+    SITEMAP_MISSING = "sitemap_missing"
+    PAGE_MISSING_FROM_SITEMAP = "page_missing_from_sitemap"
 
 
 class HeadingLevel(StrEnum):

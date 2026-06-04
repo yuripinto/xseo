@@ -17,7 +17,7 @@
 - **Live crawling** with a real-time progress view and a threaded background worker that keeps the UI responsive.
 - **Polite by default** — respects `robots.txt` and applies a configurable per-request delay so you don't hammer the sites you audit.
 - **On-page extraction** of titles, meta descriptions, headings, canonicals, robots directives, internal/external links, and more via `selectolax`.
-- **Issue detection** for missing/duplicate titles and descriptions, thin content, heading problems, broken links, mixed content (http resources on https pages), missing Open Graph tags, missing JSON-LD structured data, non-self-referential hreflang, and other common SEO defects.
+- **Issue detection** for missing/duplicate titles and descriptions, thin content, heading problems, broken links, mixed content (http resources on https pages), missing Open Graph tags, missing JSON-LD structured data, non-self-referential hreflang, pages missing from the sitemap, and other common SEO defects.
 - **Duplicate content detection** through content hashing and grouped read models.
 - **Sortable result tables** for pages, issues, and duplicate groups, with a double-click page detail dialog.
 - **Headless CLI** (`xseo crawl <url>`) that runs the same engine without the GUI — JSON, CSV, HTML, and SARIF reports, an `xseo diff` to compare crawls, and a `--fail-on` exit code, so you can gate CI on SEO regressions.
@@ -180,7 +180,7 @@ python3 -m compileall src tests
 python3 -m pytest -q
 ```
 
-The current suite has 182 tests covering domain logic, adapters, integration, property-based invariants, CLI behavior, report rendering, and UI smoke tests.
+The current suite has 193 tests covering domain logic, adapters, integration, property-based invariants, CLI behavior, report rendering, and UI smoke tests.
 
 ## Project layout
 
