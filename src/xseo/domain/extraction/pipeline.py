@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from selectolax.parser import HTMLParser
 
 from xseo.domain.entities import ExtractedPage, ExtractionResult, Heading
@@ -52,8 +54,8 @@ class SeoExtractionPipeline:
                 structured_data_blocks
             )
             mixed_content_count = _mixed_content_count(tree, final_url)
-            has_hreflang, hreflang_self_referential = _hreflang_stats(
-                tree, final_url, self.normalizer
+            has_hreflang, hreflang_self_referential, has_invalid_hreflang = (
+                _hreflang_stats(tree, final_url, self.normalizer)
             )
             # _visible_text strips <script>/<style> nodes, so it must run only
             # after the signals above that inspect those tags.
@@ -85,6 +87,7 @@ class SeoExtractionPipeline:
                 hreflang_self_referential=hreflang_self_referential,
                 images_missing_dimensions=images_missing_dimensions,
                 structured_data_invalid=structured_data_invalid,
+                has_invalid_hreflang=has_invalid_hreflang,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -198,28 +201,46 @@ def _has_charset(tree):
     return "charset" in content.lower()
 
 
+# A hreflang value is a BCP-47 language tag: language (2-3 letters), optional
+# script (4 letters), optional region (2 letters or 3 digits) — e.g. "en",
+# "en-US", "zh-Hant", "es-419". "x-default" is the only other legal value.
+_HREFLANG_CODE = re.compile(r"^[a-zA-Z]{2,3}(-[a-zA-Z]{4})?(-([a-zA-Z]{2}|[0-9]{3}))?$")
+
+
+def _is_valid_hreflang_code(code):
+    if not code:
+        return False
+    if code.lower() == "x-default":
+        return True
+    return _HREFLANG_CODE.match(code) is not None
+
+
 def _hreflang_stats(tree, final_url, normalizer):
-    """Return (has_hreflang, self_referential) for the page's hreflang set.
+    """Return (has_hreflang, self_referential, has_invalid_code) for the set.
 
     Google requires every hreflang cluster to be self-referential — a page that
     declares language alternates must also list its own URL among them. We
     normalize each ``href`` against the page URL and check the page's own final
-    URL is present.
+    URL is present, and also validate that each ``hreflang`` value is a legal
+    language tag (an invalid code makes Google ignore the annotation).
     """
     nodes = tree.css('link[rel="alternate"][hreflang]')
     if not nodes:
-        return False, True
+        return False, True, False
     own = final_url.value if hasattr(final_url, "value") else str(final_url)
     self_referential = False
+    has_invalid = False
     for node in nodes:
+        code = (node.attributes.get("hreflang") or "").strip()
+        if not _is_valid_hreflang_code(code):
+            has_invalid = True
         href = node.attributes.get("href")
         if not href:
             continue
         result = normalizer.normalize(href, base_url=final_url)
         if result.ok and result.value.value == own:
             self_referential = True
-            break
-    return True, self_referential
+    return True, self_referential, has_invalid
 
 
 def _has_open_graph(tree):

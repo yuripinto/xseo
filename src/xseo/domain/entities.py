@@ -195,6 +195,7 @@ class ExtractedPage:
     depth: int = 0
     images_missing_dimensions: int = 0
     structured_data_invalid: bool = False
+    has_invalid_hreflang: bool = False
 
 
 @dataclass(frozen=True)

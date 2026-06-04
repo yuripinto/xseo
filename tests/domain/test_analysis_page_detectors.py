@@ -351,3 +351,29 @@ def test_page_without_hreflang_is_not_flagged():
     assert IssueType.HREFLANG_NO_SELF_REFERENCE not in _issue_types(
         detect_page_issues(page, headings=(_h1(page),))
     )
+
+
+def test_detects_invalid_hreflang_code():
+    page = _page(has_hreflang=True, has_invalid_hreflang=True)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.HREFLANG_INVALID_CODE in _issue_types(issues)
+    issue = next(i for i in issues if i.issue_type == IssueType.HREFLANG_INVALID_CODE)
+    assert issue.severity == IssueSeverity.MEDIUM
+
+
+def test_valid_hreflang_codes_are_not_flagged():
+    page = _page(has_hreflang=True, has_invalid_hreflang=False)
+
+    assert IssueType.HREFLANG_INVALID_CODE not in _issue_types(
+        detect_page_issues(page, headings=(_h1(page),))
+    )
+
+
+def test_invalid_hreflang_code_ignored_without_hreflang():
+    page = _page(has_hreflang=False, has_invalid_hreflang=True)
+
+    assert IssueType.HREFLANG_INVALID_CODE not in _issue_types(
+        detect_page_issues(page, headings=(_h1(page),))
+    )

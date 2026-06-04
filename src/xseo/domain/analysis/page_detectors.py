@@ -332,4 +332,17 @@ def detect_page_issues(
             )
         )
 
+    if page.has_hreflang and page.has_invalid_hreflang:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.HREFLANG_INVALID_CODE,
+                "Page declares an hreflang with an invalid language/region code; "
+                "Google ignores annotations whose code is not a valid BCP-47 tag.",
+                severity_policy,
+            )
+        )
+
     return tuple(issues)

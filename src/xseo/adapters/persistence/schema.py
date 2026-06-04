@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS pages (
     hreflang_self_referential INTEGER NOT NULL DEFAULT 1,
     depth INTEGER NOT NULL DEFAULT 0,
     images_missing_dimensions INTEGER NOT NULL DEFAULT 0,
-    structured_data_invalid INTEGER NOT NULL DEFAULT 0
+    structured_data_invalid INTEGER NOT NULL DEFAULT 0,
+    has_invalid_hreflang INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -178,5 +179,9 @@ PAGE_COLUMN_MIGRATIONS = (
     (
         "structured_data_invalid",
         "ALTER TABLE pages ADD COLUMN structured_data_invalid INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "has_invalid_hreflang",
+        "ALTER TABLE pages ADD COLUMN has_invalid_hreflang INTEGER NOT NULL DEFAULT 0",
     ),
 )

@@ -265,6 +265,41 @@ def test_extraction_pipeline_detects_hreflang_self_reference():
     )
 
 
+def test_extraction_pipeline_flags_invalid_hreflang_code():
+    crawl_id, page_id = _ids()
+    bad = b"""
+    <html><head>
+      <link rel="alternate" hreflang="en" href="https://example.com/">
+      <link rel="alternate" hreflang="english" href="https://example.com/en/">
+    </head><body>Hi</body></html>
+    """
+    ok = b"""
+    <html><head>
+      <link rel="alternate" hreflang="en-US" href="https://example.com/">
+      <link rel="alternate" hreflang="x-default" href="https://example.com/">
+    </head><body>Hi</body></html>
+    """
+
+    bad_page = (
+        SeoExtractionPipeline().extract(_fetch(bad), crawl_id, page_id)
+    ).extraction_result.page
+    ok_page = (
+        SeoExtractionPipeline().extract(_fetch(ok), crawl_id, page_id)
+    ).extraction_result.page
+
+    assert bad_page.has_invalid_hreflang is True
+    assert ok_page.has_invalid_hreflang is False
+
+
+def test_is_valid_hreflang_code_accepts_and_rejects_expected_tags():
+    from xseo.domain.extraction.pipeline import _is_valid_hreflang_code
+
+    for good in ("en", "en-US", "zh-Hant", "es-419", "x-default", "ZH-hant-HK"):
+        assert _is_valid_hreflang_code(good) is True, good
+    for bad in ("", "english", "en_US", "e", "123", "en-USA"):
+        assert _is_valid_hreflang_code(bad) is False, bad
+
+
 def test_extraction_pipeline_returns_error_for_non_html_success():
     crawl_id, page_id = _ids()
 
