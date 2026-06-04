@@ -63,6 +63,7 @@ class IssueSeverityPolicy:
             IssueType.STRUCTURED_DATA_MISSING: IssueSeverity.LOW,
             IssueType.STRUCTURED_DATA_INVALID: IssueSeverity.MEDIUM,
             IssueType.HREFLANG_NO_SELF_REFERENCE: IssueSeverity.MEDIUM,
+            IssueType.HREFLANG_INVALID_CODE: IssueSeverity.MEDIUM,
             IssueType.SITEMAP_MISSING: IssueSeverity.LOW,
             IssueType.PAGE_MISSING_FROM_SITEMAP: IssueSeverity.LOW,
             IssueType.SITEMAP_STALE_URL: IssueSeverity.LOW,

@@ -131,6 +131,7 @@ def test_migration_adds_image_columns_to_legacy_pages_table():
         "depth",
         "images_missing_dimensions",
         "structured_data_invalid",
+        "has_invalid_hreflang",
     } <= columns
     assert (
         conn.execute("SELECT depth FROM pages WHERE page_id = 'p1'").fetchone()["depth"]

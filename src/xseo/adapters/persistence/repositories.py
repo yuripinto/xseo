@@ -100,8 +100,8 @@ class SQLiteCrawlDataRepository:
                 image_count, images_missing_alt, has_viewport, has_lang, has_charset,
                 has_open_graph, has_structured_data, mixed_content_count,
                 has_hreflang, hreflang_self_referential, depth, images_missing_dimensions,
-                structured_data_invalid
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                structured_data_invalid, has_invalid_hreflang
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(page_id) DO UPDATE SET
                 crawl_id=excluded.crawl_id,
                 url=excluded.url,
@@ -127,7 +127,8 @@ class SQLiteCrawlDataRepository:
                 hreflang_self_referential=excluded.hreflang_self_referential,
                 depth=excluded.depth,
                 images_missing_dimensions=excluded.images_missing_dimensions,
-                structured_data_invalid=excluded.structured_data_invalid
+                structured_data_invalid=excluded.structured_data_invalid,
+                has_invalid_hreflang=excluded.has_invalid_hreflang
             """,
             _page_params(page),
         )
@@ -501,6 +502,7 @@ def _page_params(page):
         page.depth,
         page.images_missing_dimensions,
         int(page.structured_data_invalid),
+        int(page.has_invalid_hreflang),
     )
 
 
@@ -557,6 +559,7 @@ def _page_from_row(row):
         row["depth"],
         row["images_missing_dimensions"],
         bool(row["structured_data_invalid"]),
+        bool(row["has_invalid_hreflang"]),
     )
 
 
