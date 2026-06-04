@@ -11,8 +11,10 @@ from xseo.domain.enums import IssueSeverity, IssueType
 class ThresholdPolicy:
     title_min: int = 30
     title_max: int = 60
+    title_pixel_max: int = 580
     meta_description_min: int = 70
     meta_description_max: int = 160
+    meta_description_pixel_max: int = 920
     thin_content_min_words: int = 200
     page_size_max_bytes: int = 2_000_000
     max_links_per_page: int = 300
@@ -31,10 +33,12 @@ class IssueSeverityPolicy:
             IssueType.TITLE_DUPLICATE: IssueSeverity.MEDIUM,
             IssueType.TITLE_TOO_SHORT: IssueSeverity.LOW,
             IssueType.TITLE_TOO_LONG: IssueSeverity.LOW,
+            IssueType.TITLE_PIXEL_TOO_LONG: IssueSeverity.LOW,
             IssueType.META_DESCRIPTION_MISSING: IssueSeverity.MEDIUM,
             IssueType.META_DESCRIPTION_DUPLICATE: IssueSeverity.MEDIUM,
             IssueType.META_DESCRIPTION_TOO_SHORT: IssueSeverity.LOW,
             IssueType.META_DESCRIPTION_TOO_LONG: IssueSeverity.LOW,
+            IssueType.META_DESCRIPTION_PIXEL_TOO_LONG: IssueSeverity.LOW,
             IssueType.H1_MISSING: IssueSeverity.MEDIUM,
             IssueType.H1_MULTIPLE: IssueSeverity.MEDIUM,
             IssueType.CANONICAL_MISMATCH: IssueSeverity.HIGH,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from xseo.domain.analysis.issues import build_issue
 from xseo.domain.analysis.policies import DEFAULT_SEVERITY_POLICY, DEFAULT_THRESHOLDS
+from xseo.domain.analysis.text_metrics import estimate_pixel_width
 from xseo.domain.enums import HeadingLevel, IssueType
 
 
@@ -51,6 +52,22 @@ def detect_page_issues(
             )
         )
 
+    if title.strip():
+        title_pixels = estimate_pixel_width(title.strip())
+        if title_pixels > thresholds.title_pixel_max:
+            issues.append(
+                build_issue(
+                    page.crawl_id,
+                    page.page_id,
+                    page.final_url,
+                    IssueType.TITLE_PIXEL_TOO_LONG,
+                    f"Page title is about {title_pixels}px wide (more than "
+                    f"{thresholds.title_pixel_max}px) and will be truncated in "
+                    "search results.",
+                    severity_policy,
+                )
+            )
+
     if not meta_description.strip():
         issues.append(
             build_issue(
@@ -84,6 +101,22 @@ def detect_page_issues(
                 severity_policy,
             )
         )
+
+    if meta_description.strip():
+        meta_pixels = estimate_pixel_width(meta_description.strip())
+        if meta_pixels > thresholds.meta_description_pixel_max:
+            issues.append(
+                build_issue(
+                    page.crawl_id,
+                    page.page_id,
+                    page.final_url,
+                    IssueType.META_DESCRIPTION_PIXEL_TOO_LONG,
+                    f"Meta description is about {meta_pixels}px wide (more than "
+                    f"{thresholds.meta_description_pixel_max}px) and will be "
+                    "truncated in search results.",
+                    severity_policy,
+                )
+            )
 
     h1s = tuple(
         heading
