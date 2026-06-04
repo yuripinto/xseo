@@ -20,6 +20,7 @@
 - **Issue detection** for missing/duplicate titles and descriptions, thin content, heading problems, broken links, and other common SEO defects.
 - **Duplicate content detection** through content hashing and grouped read models.
 - **Sortable result tables** for pages, issues, and duplicate groups, with a double-click page detail dialog.
+- **Headless CLI** (`xseo crawl <url>`) that runs the same engine without the GUI — JSON/CSV reports and a `--fail-on` exit code, so you can gate CI on SEO regressions.
 - **CSV export** for every result view, so you can pipe findings into spreadsheets or other tools.
 - **Local persistence** in SQLite at `~/.xseo/xseo.sqlite3`. The last crawl is restored automatically on launch.
 - **Clean architecture** — domain, application, and adapter layers are strictly separated, with ports/adapters for HTTP, persistence, export, and the UI.
@@ -101,6 +102,40 @@ python3 -m xseo.ui.app
 
 Enter a URL, click **Start Crawl**, and watch the progress tab fill in. When the crawl finishes, browse pages, issues, and duplicate groups in their respective tabs. Double-click any page row for full detail, or export any view to CSV.
 
+### Command line
+
+`xseo` also runs headless — no GUI, scriptable, and CI-friendly. It uses the same crawl engine and the same SQLite store as the desktop app, so you can audit from the terminal and still open the results in the UI later.
+
+```bash
+xseo crawl https://example.com/
+```
+
+```text
+Crawling https://example.com/ …
+
+Crawled 142 pages, found 38 issues
+
+  HIGH       3  broken_internal_link
+  MEDIUM    12  meta_description_missing
+  LOW       22  thin_content
+```
+
+Write a machine-readable report, or pipe JSON straight to another tool:
+
+```bash
+xseo crawl https://example.com/ --out report.json      # full JSON report
+xseo crawl https://example.com/ --out - | jq '.summary' # JSON to stdout
+xseo crawl https://example.com/ --format csv --out issues.csv
+```
+
+Use it as a build gate — `--fail-on` makes the command exit non-zero when an issue at or above the given severity is found, so a regression breaks CI:
+
+```bash
+xseo crawl https://example.com/ --fail-on high
+```
+
+Other flags: `--limit`, `--delay`, `--timeout`, `--no-robots`, `--all-hosts`, `--db`. Run `xseo crawl --help` for the full list.
+
 ## Verify
 
 ```bash
@@ -108,7 +143,7 @@ python3 -m compileall src tests
 python3 -m pytest -q
 ```
 
-The current suite has 145 tests covering domain logic, adapters, integration, property-based invariants, and UI smoke tests.
+The current suite has 165 tests covering domain logic, adapters, integration, property-based invariants, CLI behavior, and UI smoke tests.
 
 ## Project layout
 

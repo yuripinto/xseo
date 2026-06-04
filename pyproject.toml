@@ -31,6 +31,7 @@ Repository = "https://github.com/yuripinto/xseo"
 Issues = "https://github.com/yuripinto/xseo/issues"
 
 [project.scripts]
+xseo = "xseo.cli:main"
 xseo-ui = "xseo.ui.app:main"
 
 [project.optional-dependencies]
