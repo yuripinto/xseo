@@ -1,6 +1,7 @@
 """SEO issue analysis domain services."""
 
 from xseo.domain.analysis.cross_page_detectors import (
+    detect_canonical_target_issues,
     detect_cross_page_issues,
     detect_duplicate_meta_description_issues,
     detect_duplicate_title_issues,
@@ -34,6 +35,7 @@ __all__ = [
     "IssueSeverityPolicy",
     "LinkStatusRecord",
     "ThresholdPolicy",
+    "detect_canonical_target_issues",
     "detect_cross_page_issues",
     "detect_duplicate_meta_description_issues",
     "detect_duplicate_title_issues",
