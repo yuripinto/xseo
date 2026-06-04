@@ -45,6 +45,9 @@ class SeoExtractionPipeline:
             has_open_graph = _has_open_graph(tree)
             has_structured_data = _has_structured_data(tree)
             mixed_content_count = _mixed_content_count(tree, final_url)
+            has_hreflang, hreflang_self_referential = _hreflang_stats(
+                tree, final_url, self.normalizer
+            )
             # _visible_text strips <script>/<style> nodes, so it must run only
             # after the signals above that inspect those tags.
             visible_text = _visible_text(tree)
@@ -71,6 +74,8 @@ class SeoExtractionPipeline:
                 has_open_graph=has_open_graph,
                 has_structured_data=has_structured_data,
                 mixed_content_count=mixed_content_count,
+                has_hreflang=has_hreflang,
+                hreflang_self_referential=hreflang_self_referential,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -170,6 +175,30 @@ def _has_charset(tree):
         node = tree.css_first('meta[http-equiv="content-type"]')
     content = (node.attributes.get("content") or "") if node is not None else ""
     return "charset" in content.lower()
+
+
+def _hreflang_stats(tree, final_url, normalizer):
+    """Return (has_hreflang, self_referential) for the page's hreflang set.
+
+    Google requires every hreflang cluster to be self-referential — a page that
+    declares language alternates must also list its own URL among them. We
+    normalize each ``href`` against the page URL and check the page's own final
+    URL is present.
+    """
+    nodes = tree.css('link[rel="alternate"][hreflang]')
+    if not nodes:
+        return False, True
+    own = final_url.value if hasattr(final_url, "value") else str(final_url)
+    self_referential = False
+    for node in nodes:
+        href = node.attributes.get("href")
+        if not href:
+            continue
+        result = normalizer.normalize(href, base_url=final_url)
+        if result.ok and result.value.value == own:
+            self_referential = True
+            break
+    return True, self_referential
 
 
 def _has_open_graph(tree):

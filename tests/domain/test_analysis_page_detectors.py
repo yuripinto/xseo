@@ -232,3 +232,33 @@ def test_page_with_social_and_structured_data_is_clean():
 
     assert IssueType.OPEN_GRAPH_MISSING not in types
     assert IssueType.STRUCTURED_DATA_MISSING not in types
+
+
+def test_detects_hreflang_without_self_reference():
+    page = _page(has_hreflang=True, hreflang_self_referential=False)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.HREFLANG_NO_SELF_REFERENCE in _issue_types(issues)
+    hreflang = next(
+        i for i in issues if i.issue_type == IssueType.HREFLANG_NO_SELF_REFERENCE
+    )
+    assert hreflang.severity == IssueSeverity.MEDIUM
+
+
+def test_self_referential_hreflang_is_clean():
+    page = _page(has_hreflang=True, hreflang_self_referential=True)
+
+    assert IssueType.HREFLANG_NO_SELF_REFERENCE not in _issue_types(
+        detect_page_issues(page, headings=(_h1(page),))
+    )
+
+
+def test_page_without_hreflang_is_not_flagged():
+    # A page that uses no hreflang at all must never be flagged, even though
+    # "self_referential" is vacuously false-ish for an empty set.
+    page = _page(has_hreflang=False, hreflang_self_referential=False)
+
+    assert IssueType.HREFLANG_NO_SELF_REFERENCE not in _issue_types(
+        detect_page_issues(page, headings=(_h1(page),))
+    )

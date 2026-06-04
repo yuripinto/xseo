@@ -180,6 +180,45 @@ def test_extraction_pipeline_counts_mixed_content_only_on_https():
     assert http_page.mixed_content_count == 0
 
 
+def test_extraction_pipeline_detects_hreflang_self_reference():
+    crawl_id, page_id = _ids()
+    # The page is https://example.com/ and lists itself among the alternates.
+    good = b"""
+    <html><head>
+      <link rel="alternate" hreflang="en" href="https://example.com/">
+      <link rel="alternate" hreflang="es" href="https://example.com/es/">
+    </head><body>Hi</body></html>
+    """
+    # Same alternates but the page omits its own URL.
+    missing = b"""
+    <html><head>
+      <link rel="alternate" hreflang="es" href="https://example.com/es/">
+      <link rel="alternate" hreflang="fr" href="https://example.com/fr/">
+    </head><body>Hi</body></html>
+    """
+    none = b"<html><head></head><body>Hi</body></html>"
+
+    good_page = (
+        SeoExtractionPipeline().extract(_fetch(good), crawl_id, page_id)
+    ).extraction_result.page
+    missing_page = (
+        SeoExtractionPipeline().extract(_fetch(missing), crawl_id, page_id)
+    ).extraction_result.page
+    none_page = (
+        SeoExtractionPipeline().extract(_fetch(none), crawl_id, page_id)
+    ).extraction_result.page
+
+    assert (good_page.has_hreflang, good_page.hreflang_self_referential) == (True, True)
+    assert (missing_page.has_hreflang, missing_page.hreflang_self_referential) == (
+        True,
+        False,
+    )
+    assert (none_page.has_hreflang, none_page.hreflang_self_referential) == (
+        False,
+        True,
+    )
+
+
 def test_extraction_pipeline_returns_error_for_non_html_success():
     crawl_id, page_id = _ids()
 

@@ -247,4 +247,17 @@ def detect_page_issues(
             )
         )
 
+    if page.has_hreflang and not page.hreflang_self_referential:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.HREFLANG_NO_SELF_REFERENCE,
+                "Page declares hreflang alternates but none point back to itself; "
+                "every hreflang cluster must be self-referential.",
+                severity_policy,
+            )
+        )
+
     return tuple(issues)
