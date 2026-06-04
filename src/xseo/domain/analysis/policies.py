@@ -46,6 +46,7 @@ class IssueSeverityPolicy:
             IssueType.MIXED_CONTENT: IssueSeverity.HIGH,
             IssueType.OPEN_GRAPH_MISSING: IssueSeverity.LOW,
             IssueType.STRUCTURED_DATA_MISSING: IssueSeverity.LOW,
+            IssueType.HREFLANG_NO_SELF_REFERENCE: IssueSeverity.MEDIUM,
         }
     )
 

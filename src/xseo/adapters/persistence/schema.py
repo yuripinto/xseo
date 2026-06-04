@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS pages (
     has_charset INTEGER NOT NULL DEFAULT 0,
     has_open_graph INTEGER NOT NULL DEFAULT 0,
     has_structured_data INTEGER NOT NULL DEFAULT 0,
-    mixed_content_count INTEGER NOT NULL DEFAULT 0
+    mixed_content_count INTEGER NOT NULL DEFAULT 0,
+    has_hreflang INTEGER NOT NULL DEFAULT 0,
+    hreflang_self_referential INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -153,5 +155,13 @@ PAGE_COLUMN_MIGRATIONS = (
     (
         "mixed_content_count",
         "ALTER TABLE pages ADD COLUMN mixed_content_count INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "has_hreflang",
+        "ALTER TABLE pages ADD COLUMN has_hreflang INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "hreflang_self_referential",
+        "ALTER TABLE pages ADD COLUMN hreflang_self_referential INTEGER NOT NULL DEFAULT 1",
     ),
 )
