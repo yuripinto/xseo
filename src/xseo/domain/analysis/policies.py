@@ -15,6 +15,7 @@ class ThresholdPolicy:
     meta_description_max: int = 160
     thin_content_min_words: int = 200
     page_size_max_bytes: int = 2_000_000
+    max_links_per_page: int = 300
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,8 @@ class IssueSeverityPolicy:
             IssueType.PAGE_TOO_LARGE: IssueSeverity.LOW,
             IssueType.NOINDEX_PAGE: IssueSeverity.MEDIUM,
             IssueType.INSECURE_INTERNAL_LINK: IssueSeverity.MEDIUM,
+            IssueType.INTERNAL_LINK_NOFOLLOW: IssueSeverity.LOW,
+            IssueType.EXCESSIVE_LINKS: IssueSeverity.LOW,
             IssueType.IMAGES_MISSING_ALT: IssueSeverity.LOW,
             IssueType.MISSING_VIEWPORT: IssueSeverity.MEDIUM,
             IssueType.MISSING_LANG: IssueSeverity.LOW,
