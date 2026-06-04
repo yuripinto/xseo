@@ -97,8 +97,9 @@ class SQLiteCrawlDataRepository:
             INSERT INTO pages(
                 page_id, crawl_id, url, final_url, status_code, content_type, title,
                 meta_description, canonical_url, robots_meta, word_count, content_length, content_hash,
-                image_count, images_missing_alt, has_viewport, has_lang, has_charset
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                image_count, images_missing_alt, has_viewport, has_lang, has_charset,
+                has_open_graph, has_structured_data, mixed_content_count
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(page_id) DO UPDATE SET
                 crawl_id=excluded.crawl_id,
                 url=excluded.url,
@@ -116,7 +117,10 @@ class SQLiteCrawlDataRepository:
                 images_missing_alt=excluded.images_missing_alt,
                 has_viewport=excluded.has_viewport,
                 has_lang=excluded.has_lang,
-                has_charset=excluded.has_charset
+                has_charset=excluded.has_charset,
+                has_open_graph=excluded.has_open_graph,
+                has_structured_data=excluded.has_structured_data,
+                mixed_content_count=excluded.mixed_content_count
             """,
             _page_params(page),
         )
@@ -482,6 +486,9 @@ def _page_params(page):
         int(page.has_viewport),
         int(page.has_lang),
         int(page.has_charset),
+        int(page.has_open_graph),
+        int(page.has_structured_data),
+        page.mixed_content_count,
     )
 
 
@@ -530,6 +537,9 @@ def _page_from_row(row):
         bool(row["has_viewport"]),
         bool(row["has_lang"]),
         bool(row["has_charset"]),
+        bool(row["has_open_graph"]),
+        bool(row["has_structured_data"]),
+        row["mixed_content_count"],
     )
 
 

@@ -187,6 +187,9 @@ class ExtractedPage:
     has_viewport: bool = False
     has_lang: bool = False
     has_charset: bool = False
+    has_open_graph: bool = False
+    has_structured_data: bool = False
+    mixed_content_count: int = 0
 
 
 @dataclass(frozen=True)

@@ -35,6 +35,9 @@ def _page(**overrides):
         "has_viewport": True,
         "has_lang": True,
         "has_charset": True,
+        "has_open_graph": True,
+        "has_structured_data": True,
+        "mixed_content_count": 0,
     }
     values.update(overrides)
     return ExtractedPage(**values)
@@ -192,3 +195,40 @@ def test_page_with_head_meta_present_is_clean():
     assert IssueType.MISSING_VIEWPORT not in types
     assert IssueType.MISSING_LANG not in types
     assert IssueType.MISSING_CHARSET not in types
+
+
+def test_detects_mixed_content_as_high_severity():
+    page = _page(mixed_content_count=3)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+
+    assert IssueType.MIXED_CONTENT in _issue_types(issues)
+    mixed = next(i for i in issues if i.issue_type == IssueType.MIXED_CONTENT)
+    assert mixed.severity == IssueSeverity.HIGH
+    assert "3 resources" in mixed.explanation
+
+
+def test_no_mixed_content_when_count_zero():
+    page = _page(mixed_content_count=0)
+
+    assert IssueType.MIXED_CONTENT not in _issue_types(
+        detect_page_issues(page, headings=(_h1(page),))
+    )
+
+
+def test_detects_missing_open_graph_and_structured_data():
+    page = _page(has_open_graph=False, has_structured_data=False)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.OPEN_GRAPH_MISSING in types
+    assert IssueType.STRUCTURED_DATA_MISSING in types
+
+
+def test_page_with_social_and_structured_data_is_clean():
+    page = _page(has_open_graph=True, has_structured_data=True)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.OPEN_GRAPH_MISSING not in types
+    assert IssueType.STRUCTURED_DATA_MISSING not in types

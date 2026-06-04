@@ -110,6 +110,76 @@ def test_extraction_pipeline_detects_head_meta_presence():
     ) == (False, False, False)
 
 
+def test_extraction_pipeline_detects_open_graph_and_structured_data():
+    crawl_id, page_id = _ids()
+    rich = b"""
+    <html><head>
+      <meta property="og:title" content="Shareable">
+      <script type="application/ld+json">{"@type":"Article"}</script>
+    </head><body>Hi</body></html>
+    """
+    bare = b"<html><head></head><body>Hi</body></html>"
+
+    rich_page = (
+        SeoExtractionPipeline().extract(_fetch(rich), crawl_id, page_id)
+    ).extraction_result.page
+    bare_page = (
+        SeoExtractionPipeline().extract(_fetch(bare), crawl_id, page_id)
+    ).extraction_result.page
+
+    assert (rich_page.has_open_graph, rich_page.has_structured_data) == (True, True)
+    assert (bare_page.has_open_graph, bare_page.has_structured_data) == (False, False)
+
+
+def test_extraction_pipeline_counts_mixed_content_only_on_https():
+    crawl_id, page_id = _ids()
+    body = b"""
+    <html><head>
+      <link rel="stylesheet" href="http://cdn.example.com/app.css">
+    </head><body>
+      <img src="http://cdn.example.com/a.png">
+      <script src="https://cdn.example.com/safe.js"></script>
+      <img src="/relative.png">
+    </body></html>
+    """
+
+    # Same markup served from https counts the two http sub-resources...
+    https_url = NormalizedUrl.create("https://example.com/").value
+    https_page = (
+        SeoExtractionPipeline().extract(
+            FetchResult(
+                requested_url=https_url,
+                final_url=https_url,
+                status=FetchStatus.SUCCESS,
+                status_code=200,
+                content_type="text/html",
+                body=body,
+            ),
+            crawl_id,
+            page_id,
+        )
+    ).extraction_result.page
+    assert https_page.mixed_content_count == 2
+
+    # ...but on an http page there is no mixed content to flag.
+    http_url = NormalizedUrl.create("http://example.com/").value
+    http_page = (
+        SeoExtractionPipeline().extract(
+            FetchResult(
+                requested_url=http_url,
+                final_url=http_url,
+                status=FetchStatus.SUCCESS,
+                status_code=200,
+                content_type="text/html",
+                body=body,
+            ),
+            crawl_id,
+            page_id,
+        )
+    ).extraction_result.page
+    assert http_page.mixed_content_count == 0
+
+
 def test_extraction_pipeline_returns_error_for_non_html_success():
     crawl_id, page_id = _ids()
 
