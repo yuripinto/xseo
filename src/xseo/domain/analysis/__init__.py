@@ -14,6 +14,7 @@ from xseo.domain.analysis.link_detectors import (
     LinkStatusRecord,
     detect_insecure_link_issues,
     detect_link_issues,
+    detect_redirect_chain_issues,
 )
 from xseo.domain.analysis.page_detectors import detect_page_issues
 from xseo.domain.analysis.policies import (
@@ -37,6 +38,7 @@ __all__ = [
     "detect_insecure_link_issues",
     "detect_link_issues",
     "detect_page_issues",
+    "detect_redirect_chain_issues",
     "duplicate_group_key",
     "issue_key",
     "normalize_comparable_text",

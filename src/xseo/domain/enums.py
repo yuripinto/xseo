@@ -30,6 +30,8 @@ class IssueSeverity(StrEnum):
 class IssueType(StrEnum):
     BROKEN_INTERNAL_LINK = "broken_internal_link"
     REDIRECTING_URL = "redirecting_url"
+    REDIRECT_CHAIN = "redirect_chain"
+    REDIRECT_LOOP = "redirect_loop"
     TITLE_MISSING = "title_missing"
     TITLE_DUPLICATE = "title_duplicate"
     TITLE_TOO_SHORT = "title_too_short"

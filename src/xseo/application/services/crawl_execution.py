@@ -55,9 +55,10 @@ class CrawlExecutionCoordinator:
         headings = getattr(data, "headings", ())
         link_statuses = getattr(data, "link_statuses", ())
         links = getattr(data, "links", ())
+        redirects = getattr(data, "redirects", ())
         if self.issue_analysis_service is not None:
             issues = self.issue_analysis_service.detect_issues(
-                crawl_id, pages, headings, link_statuses, links
+                crawl_id, pages, headings, link_statuses, links, redirects
             )
             self.analysis_repository.save_issues(crawl_id, issues)
         if self.duplicate_detector is not None:

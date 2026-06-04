@@ -3,8 +3,9 @@ from xseo.domain.analysis import (
     LinkStatusRecord,
     detect_insecure_link_issues,
     detect_link_issues,
+    detect_redirect_chain_issues,
 )
-from xseo.domain.entities import PageLink
+from xseo.domain.entities import PageLink, Redirect
 from xseo.domain.enums import IssueSeverity, IssueType, LinkRelation
 from xseo.domain.ids import CrawlId, PageId
 from xseo.domain.urls import NormalizedUrl
@@ -99,3 +100,66 @@ def test_insecure_link_from_non_secure_page_is_ignored():
     )
 
     assert detect_insecure_link_issues((page,), links) == ()
+
+
+def _redirect(from_url, to_url, status_code=301, crawl_id=None):
+    return Redirect(
+        crawl_id=crawl_id or _id(CrawlId, "crawl-1"),
+        from_url=_url(from_url),
+        to_url=_url(to_url),
+        status_code=status_code,
+    )
+
+
+def test_flags_multi_hop_redirect_chain():
+    crawl_id = _id(CrawlId, "crawl-1")
+    redirects = (
+        _redirect("https://example.com/a", "https://example.com/b"),
+        _redirect("https://example.com/b", "https://example.com/c"),
+    )
+
+    issues = detect_redirect_chain_issues(crawl_id, redirects)
+
+    assert [issue.issue_type for issue in issues] == [IssueType.REDIRECT_CHAIN]
+    issue = issues[0]
+    assert issue.severity == IssueSeverity.MEDIUM
+    assert issue.affected_url == _url("https://example.com/a")
+    assert "2 hops" in issue.explanation
+
+
+def test_single_hop_redirect_is_not_a_chain():
+    crawl_id = _id(CrawlId, "crawl-1")
+    redirects = (_redirect("https://example.com/a", "https://example.com/b"),)
+
+    assert detect_redirect_chain_issues(crawl_id, redirects) == ()
+
+
+def test_flags_redirect_loop():
+    crawl_id = _id(CrawlId, "crawl-1")
+    redirects = (
+        _redirect("https://example.com/a", "https://example.com/b"),
+        _redirect("https://example.com/b", "https://example.com/a"),
+    )
+
+    issues = detect_redirect_chain_issues(crawl_id, redirects)
+
+    assert [issue.issue_type for issue in issues] == [IssueType.REDIRECT_LOOP]
+    assert issues[0].severity == IssueSeverity.HIGH
+
+
+def test_chain_leading_into_loop_is_reported_once():
+    crawl_id = _id(CrawlId, "crawl-1")
+    redirects = (
+        _redirect("https://example.com/start", "https://example.com/a"),
+        _redirect("https://example.com/a", "https://example.com/b"),
+        _redirect("https://example.com/b", "https://example.com/a"),
+    )
+
+    issues = detect_redirect_chain_issues(crawl_id, redirects)
+
+    assert [issue.issue_type for issue in issues] == [IssueType.REDIRECT_LOOP]
+    assert issues[0].affected_url == _url("https://example.com/start")
+
+
+def test_no_redirects_yields_no_issues():
+    assert detect_redirect_chain_issues(_id(CrawlId, "crawl-1"), ()) == ()
