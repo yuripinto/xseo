@@ -8,9 +8,9 @@
 
 `xseo` crawls a website, extracts on-page SEO signals, detects common issues and content duplication, and shows the results in a clean desktop UI — or runs **headless from the command line** so you can pipe reports into other tools and gate CI on SEO regressions. Everything runs locally and persists to a single SQLite file under `~/.xseo/`.
 
-![xseo crawling a site live](docs/images/xseo-demo.gif)
+![xseo crawling a site live](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/xseo-demo.gif)
 
-![xseo issues view](docs/images/04-issues.png)
+![xseo issues view](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/04-issues.png)
 
 ## Features
 
@@ -32,17 +32,17 @@ Configure a crawl, then watch progress stream in live:
 
 | Control | Progress |
 | --- | --- |
-| ![Control panel](docs/images/01-control.png) | ![Live progress](docs/images/02-progress.png) |
+| ![Control panel](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/01-control.png) | ![Live progress](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/02-progress.png) |
 
 Review crawled pages, detected issues, and duplicate content groups:
 
 | Pages | Duplicates |
 | --- | --- |
-| ![Pages table](docs/images/03-pages.png) | ![Duplicate groups](docs/images/05-duplicates.png) |
+| ![Pages table](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/03-pages.png) | ![Duplicate groups](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/05-duplicates.png) |
 
 Double-click any page for full detail — headings, links, redirects, and per-page issues:
 
-![Page detail dialog](docs/images/06-page-detail.png)
+![Page detail dialog](https://raw.githubusercontent.com/yuripinto/xseo/main/docs/images/06-page-detail.png)
 
 ## Tech stack
 
