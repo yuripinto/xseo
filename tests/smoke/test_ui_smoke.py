@@ -54,6 +54,9 @@ from xseo.application.events import CrawlProgressEventKind
 from xseo.ui.app import MainWindow, build_services
 
 CRAWL_TIMEOUT_SECONDS = 15.0
+# How long to wait for the background worker to finish writing analysis
+# (issues, then duplicate groups) after the crawl's CRAWL_COMPLETED event.
+ANALYSIS_SETTLE_SECONDS = 10.0
 EVENT_LOOP_TICK_MS = 50
 
 
@@ -205,6 +208,24 @@ def _run_smoke(tmp_dir: Path) -> tuple[SmokeReport, list[str]]:
                     f"crawl ended with CRAWL_FAILED; "
                     f"progress text={window._progress._log.toPlainText()!r}"
                 )
+
+            # --- 3b. Let analysis settle before reading the tables ---------
+            # The engine publishes CRAWL_COMPLETED (which the UI refreshes on)
+            # the moment the crawl finishes, but the background thread keeps
+            # writing analysis afterwards — issues first, then duplicate groups
+            # last. A refresh that lands mid-analysis sees a partial snapshot
+            # (typically duplicates still empty), which is the classic flaky
+            # failure on slower runners. Wait for the worker to fully finish,
+            # then refresh once more so the assertions see settled tables.
+            if ok and crawl_id is not None:
+                bg = controller.crawl_service.background_execution.get(crawl_id)
+                if bg is not None:
+                    settle_deadline = time.monotonic() + ANALYSIS_SETTLE_SECONDS
+                    while time.monotonic() < settle_deadline and not bg.done:
+                        app.processEvents()
+                        time.sleep(EVENT_LOOP_TICK_MS / 1000.0)
+                window._refresh_results()
+                _spin(app, 0.2)
 
             # --- 4. Tables populated ---------------------------------------
             pages_count = window._pages._table.rowCount()
