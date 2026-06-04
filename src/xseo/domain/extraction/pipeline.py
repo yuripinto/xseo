@@ -38,7 +38,9 @@ class SeoExtractionPipeline:
             tree = HTMLParser(html)
             final_url = fetch_result.final_url or fetch_result.requested_url
             canonical = _canonical_url(tree, final_url, self.normalizer)
-            image_count, images_missing_alt = _image_alt_stats(tree)
+            image_count, images_missing_alt, images_missing_dimensions = _image_stats(
+                tree
+            )
             has_viewport = _has_meta(tree, "viewport")
             has_lang = _has_lang(tree)
             has_charset = _has_charset(tree)
@@ -76,6 +78,7 @@ class SeoExtractionPipeline:
                 mixed_content_count=mixed_content_count,
                 has_hreflang=has_hreflang,
                 hreflang_self_referential=hreflang_self_referential,
+                images_missing_dimensions=images_missing_dimensions,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -148,10 +151,22 @@ def _headings(tree, page_id):
     return tuple(headings)
 
 
-def _image_alt_stats(tree):
+def _image_stats(tree):
     images = tree.css("img")
-    missing = sum(1 for image in images if "alt" not in image.attributes)
-    return len(images), missing
+    missing_alt = sum(1 for image in images if "alt" not in image.attributes)
+    # Missing an explicit width/height lets the image reflow as it loads,
+    # causing layout shift (CLS). Either dimension absent counts.
+    missing_dimensions = sum(
+        1
+        for image in images
+        if not _has_dimension(image, "width") or not _has_dimension(image, "height")
+    )
+    return len(images), missing_alt, missing_dimensions
+
+
+def _has_dimension(image, attr):
+    value = image.attributes.get(attr)
+    return value is not None and value.strip() != ""
 
 
 def _has_meta(tree, name):

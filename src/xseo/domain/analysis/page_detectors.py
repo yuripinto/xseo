@@ -209,6 +209,19 @@ def detect_page_issues(
             )
         )
 
+    if page.images_missing_dimensions > 0:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.IMAGES_MISSING_DIMENSIONS,
+                f"{page.images_missing_dimensions} of {page.image_count} images "
+                "have no width/height, which causes layout shift (CLS) as they load.",
+                severity_policy,
+            )
+        )
+
     if page.images_missing_alt > 0:
         issues.append(
             build_issue(

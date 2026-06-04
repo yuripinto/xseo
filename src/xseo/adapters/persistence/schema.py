@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS pages (
     mixed_content_count INTEGER NOT NULL DEFAULT 0,
     has_hreflang INTEGER NOT NULL DEFAULT 0,
     hreflang_self_referential INTEGER NOT NULL DEFAULT 1,
-    depth INTEGER NOT NULL DEFAULT 0
+    depth INTEGER NOT NULL DEFAULT 0,
+    images_missing_dimensions INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -168,5 +169,9 @@ PAGE_COLUMN_MIGRATIONS = (
     (
         "depth",
         "ALTER TABLE pages ADD COLUMN depth INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "images_missing_dimensions",
+        "ALTER TABLE pages ADD COLUMN images_missing_dimensions INTEGER NOT NULL DEFAULT 0",
     ),
 )
