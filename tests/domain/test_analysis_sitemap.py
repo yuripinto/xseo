@@ -101,3 +101,68 @@ def test_fully_covered_sitemap_reports_nothing():
     )
 
     assert issues == ()
+
+
+def test_flags_sitemap_url_that_redirects():
+    page = _page(
+        url=_url("https://example.com/old"),
+        final_url=_url("https://example.com/new"),
+    )
+
+    # List both the old and final URL so the only finding is the stale redirect,
+    # not the final destination being absent from the sitemap.
+    issues = detect_sitemap_issues(
+        _crawl_id(),
+        (page,),
+        ("https://example.com/old", "https://example.com/new"),
+        sitemap_found=True,
+        base_url=_base_url(),
+    )
+
+    assert _issue_types(issues) == {IssueType.SITEMAP_STALE_URL}
+    assert "redirects" in issues[0].explanation
+    assert issues[0].severity == IssueSeverity.LOW
+
+
+def test_flags_sitemap_url_that_errors():
+    page = _page(url=_url("https://example.com/gone"), status_code=404)
+
+    issues = detect_sitemap_issues(
+        _crawl_id(),
+        (page,),
+        ("https://example.com/gone",),
+        sitemap_found=True,
+        base_url=_base_url(),
+    )
+
+    assert _issue_types(issues) == {IssueType.SITEMAP_STALE_URL}
+    assert "404" in issues[0].explanation
+
+
+def test_flags_noindex_sitemap_url():
+    page = _page(url=_url("https://example.com/secret"), robots_meta="noindex")
+
+    issues = detect_sitemap_issues(
+        _crawl_id(),
+        (page,),
+        ("https://example.com/secret",),
+        sitemap_found=True,
+        base_url=_base_url(),
+    )
+
+    assert _issue_types(issues) == {IssueType.SITEMAP_STALE_URL}
+    assert "noindex" in issues[0].explanation
+
+
+def test_uncrawled_sitemap_url_is_not_judged_stale():
+    page = _page(url=_url("https://example.com/a"))
+
+    issues = detect_sitemap_issues(
+        _crawl_id(),
+        (page,),
+        ("https://example.com/a", "https://example.com/never-crawled"),
+        sitemap_found=True,
+        base_url=_base_url(),
+    )
+
+    assert issues == ()
