@@ -63,6 +63,7 @@ class IssueType(StrEnum):
     HREFLANG_NO_SELF_REFERENCE = "hreflang_no_self_reference"
     SITEMAP_MISSING = "sitemap_missing"
     PAGE_MISSING_FROM_SITEMAP = "page_missing_from_sitemap"
+    SITEMAP_STALE_URL = "sitemap_stale_url"
 
 
 class HeadingLevel(StrEnum):

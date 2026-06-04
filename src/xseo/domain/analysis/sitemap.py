@@ -101,4 +101,64 @@ def detect_sitemap_issues(
                     severity_policy,
                 )
             )
+
+    issues.extend(_detect_stale_sitemap_urls(pages, sitemap_locs, severity_policy))
     return tuple(issues)
+
+
+def _detect_stale_sitemap_urls(pages, sitemap_locs, severity_policy):
+    """Flag sitemap URLs that should not be there: redirects, errors, noindex.
+
+    The inverse of ``page_missing_from_sitemap`` — a sitemap that points at
+    URLs which redirect, return an error, or are noindex wastes crawl budget
+    and signals staleness to search engines.
+    """
+    by_requested = {canonicalize(page.url.value): page for page in pages}
+    by_final = {canonicalize(page.final_url.value): page for page in pages}
+
+    issues = []
+    for key in sorted({canonicalize(loc) for loc in sitemap_locs}):
+        requested = by_requested.get(key)
+        if requested is not None and canonicalize(requested.final_url.value) != key:
+            issues.append(
+                _stale_issue(
+                    requested,
+                    "Sitemap lists a URL that redirects; list the final "
+                    "destination instead.",
+                    severity_policy,
+                )
+            )
+            continue
+
+        page = requested or by_final.get(key)
+        if page is None:
+            continue  # not crawled — can't judge its freshness
+        if page.status_code != 200:
+            issues.append(
+                _stale_issue(
+                    page,
+                    f"Sitemap lists a URL that returned HTTP {page.status_code}.",
+                    severity_policy,
+                )
+            )
+        elif "noindex" in (page.robots_meta or "").lower():
+            issues.append(
+                _stale_issue(
+                    page,
+                    "Sitemap lists a noindex URL, which should not be in the sitemap.",
+                    severity_policy,
+                )
+            )
+    return issues
+
+
+def _stale_issue(page, explanation, severity_policy):
+    return build_issue(
+        page.crawl_id,
+        page.page_id,
+        page.url,
+        IssueType.SITEMAP_STALE_URL,
+        explanation,
+        severity_policy,
+        key_subject=page.page_id,
+    )

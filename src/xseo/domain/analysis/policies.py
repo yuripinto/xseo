@@ -57,6 +57,7 @@ class IssueSeverityPolicy:
             IssueType.HREFLANG_NO_SELF_REFERENCE: IssueSeverity.MEDIUM,
             IssueType.SITEMAP_MISSING: IssueSeverity.LOW,
             IssueType.PAGE_MISSING_FROM_SITEMAP: IssueSeverity.LOW,
+            IssueType.SITEMAP_STALE_URL: IssueSeverity.LOW,
         }
     )
 
