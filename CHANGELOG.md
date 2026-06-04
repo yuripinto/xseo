@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0](https://github.com/yuripinto/xseo/compare/v0.5.0...v0.6.0) (2026-06-04)
+
+
+### Features
+
+* audit sitemap.xml coverage during a crawl ([#21](https://github.com/yuripinto/xseo/issues/21)) ([a306c28](https://github.com/yuripinto/xseo/commit/a306c28a5429a688ed3abfb7996290f6cfa285fc))
+* detect hreflang clusters that are not self-referential ([#19](https://github.com/yuripinto/xseo/issues/19)) ([e87a27e](https://github.com/yuripinto/xseo/commit/e87a27e14a87b34ad76f5bcb82045463329f105a))
+
 ## [0.5.0](https://github.com/yuripinto/xseo/compare/v0.4.0...v0.5.0) (2026-06-04)
 
 
