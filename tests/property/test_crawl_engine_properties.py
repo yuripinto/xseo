@@ -50,7 +50,7 @@ class StopAfterFetch:
 
 
 class ManyLinks:
-    def discover_links(self, fetch_result):
+    def discover_links(self, fetch_result, depth=0):
         return tuple(f"/page-{index}" for index in range(20))
 
 

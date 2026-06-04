@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 
 from xseo.domain.extraction.pipeline import SeoExtractionPipeline
@@ -23,11 +24,11 @@ class PageProcessorLinkDiscovery:
         self.crawl_id = crawl_id
         self.page_id_factory = page_id_factory or _default_page_id
 
-    def discover_links(self, fetch_result: object) -> tuple:
+    def discover_links(self, fetch_result: object, depth: int = 0) -> tuple:
         page_id = self.page_id_factory()
         output = self.extraction_pipeline.extract(fetch_result, self.crawl_id, page_id)
         if output.extraction_result.page is not None:
-            page = output.extraction_result.page
+            page = replace(output.extraction_result.page, depth=depth)
             self.data_repository.save_page(page)
             self.data_repository.save_headings(
                 page.page_id, output.extraction_result.headings

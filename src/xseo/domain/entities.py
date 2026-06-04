@@ -192,6 +192,7 @@ class ExtractedPage:
     mixed_content_count: int = 0
     has_hreflang: bool = False
     hreflang_self_referential: bool = True
+    depth: int = 0
 
 
 @dataclass(frozen=True)

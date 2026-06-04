@@ -49,7 +49,7 @@ class FakeDiscovery:
     def __init__(self, links):
         self.links = tuple(links)
 
-    def discover_links(self, fetch_result):
+    def discover_links(self, fetch_result, depth=0):
         return self.links
 
 

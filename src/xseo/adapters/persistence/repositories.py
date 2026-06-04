@@ -99,8 +99,8 @@ class SQLiteCrawlDataRepository:
                 meta_description, canonical_url, robots_meta, word_count, content_length, content_hash,
                 image_count, images_missing_alt, has_viewport, has_lang, has_charset,
                 has_open_graph, has_structured_data, mixed_content_count,
-                has_hreflang, hreflang_self_referential
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                has_hreflang, hreflang_self_referential, depth
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(page_id) DO UPDATE SET
                 crawl_id=excluded.crawl_id,
                 url=excluded.url,
@@ -123,7 +123,8 @@ class SQLiteCrawlDataRepository:
                 has_structured_data=excluded.has_structured_data,
                 mixed_content_count=excluded.mixed_content_count,
                 has_hreflang=excluded.has_hreflang,
-                hreflang_self_referential=excluded.hreflang_self_referential
+                hreflang_self_referential=excluded.hreflang_self_referential,
+                depth=excluded.depth
             """,
             _page_params(page),
         )
@@ -494,6 +495,7 @@ def _page_params(page):
         page.mixed_content_count,
         int(page.has_hreflang),
         int(page.hreflang_self_referential),
+        page.depth,
     )
 
 
@@ -547,6 +549,7 @@ def _page_from_row(row):
         row["mixed_content_count"],
         bool(row["has_hreflang"]),
         bool(row["hreflang_self_referential"]),
+        row["depth"],
     )
 
 

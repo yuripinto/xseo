@@ -138,6 +138,20 @@ def detect_page_issues(
             )
         )
 
+    if page.depth > thresholds.max_crawl_depth:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.PAGE_TOO_DEEP,
+                f"Page is {page.depth} clicks from the start page (more than "
+                f"{thresholds.max_crawl_depth}); deep pages are crawled and ranked "
+                "less.",
+                severity_policy,
+            )
+        )
+
     if page.content_length > thresholds.page_size_max_bytes:
         issues.append(
             build_issue(

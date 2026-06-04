@@ -93,6 +93,25 @@ def test_detects_title_and_meta_threshold_issues():
     assert IssueType.META_DESCRIPTION_TOO_LONG in _issue_types(long_issues)
 
 
+def test_flags_pages_deeper_than_max_crawl_depth():
+    deep = _page(depth=5)
+
+    issues = detect_page_issues(deep, headings=(_h1(deep),))
+
+    assert IssueType.PAGE_TOO_DEEP in _issue_types(issues)
+    too_deep = next(i for i in issues if i.issue_type == IssueType.PAGE_TOO_DEEP)
+    assert too_deep.severity == IssueSeverity.LOW
+    assert "5 clicks" in too_deep.explanation
+
+
+def test_page_within_max_crawl_depth_is_not_flagged():
+    shallow = _page(depth=2)
+
+    issues = detect_page_issues(shallow, headings=(_h1(shallow),))
+
+    assert IssueType.PAGE_TOO_DEEP not in _issue_types(issues)
+
+
 def test_detects_multiple_h1_and_canonical_mismatch():
     final_url = _url("https://example.com/page")
     canonical_url = _url("https://example.com/canonical")
