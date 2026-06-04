@@ -64,6 +64,7 @@ class IssueType(StrEnum):
     MIXED_CONTENT = "mixed_content"
     OPEN_GRAPH_MISSING = "open_graph_missing"
     STRUCTURED_DATA_MISSING = "structured_data_missing"
+    STRUCTURED_DATA_INVALID = "structured_data_invalid"
     HREFLANG_NO_SELF_REFERENCE = "hreflang_no_self_reference"
     SITEMAP_MISSING = "sitemap_missing"
     PAGE_MISSING_FROM_SITEMAP = "page_missing_from_sitemap"

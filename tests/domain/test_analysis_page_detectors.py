@@ -306,6 +306,23 @@ def test_page_with_social_and_structured_data_is_clean():
     assert IssueType.STRUCTURED_DATA_MISSING not in types
 
 
+def test_detects_invalid_structured_data_instead_of_missing():
+    page = _page(has_structured_data=True, structured_data_invalid=True)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.STRUCTURED_DATA_INVALID in types
+    assert IssueType.STRUCTURED_DATA_MISSING not in types
+
+
+def test_valid_structured_data_is_not_flagged_invalid():
+    page = _page(has_structured_data=True, structured_data_invalid=False)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.STRUCTURED_DATA_INVALID not in types
+
+
 def test_detects_hreflang_without_self_reference():
     page = _page(has_hreflang=True, hreflang_self_referential=False)
 

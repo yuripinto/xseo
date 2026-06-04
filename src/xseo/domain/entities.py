@@ -194,6 +194,7 @@ class ExtractedPage:
     hreflang_self_referential: bool = True
     depth: int = 0
     images_missing_dimensions: int = 0
+    structured_data_invalid: bool = False
 
 
 @dataclass(frozen=True)

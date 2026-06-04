@@ -306,6 +306,18 @@ def detect_page_issues(
                 severity_policy,
             )
         )
+    elif page.structured_data_invalid:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.STRUCTURED_DATA_INVALID,
+                "Page has JSON-LD structured data, but it is malformed or missing "
+                "@context/@type, so search engines will ignore it.",
+                severity_policy,
+            )
+        )
 
     if page.has_hreflang and not page.hreflang_self_referential:
         issues.append(
