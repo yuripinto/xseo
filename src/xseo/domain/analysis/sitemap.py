@@ -14,6 +14,7 @@ from urllib.parse import urlsplit, urlunsplit
 from xseo.domain.analysis.issues import build_issue
 from xseo.domain.analysis.policies import DEFAULT_SEVERITY_POLICY
 from xseo.domain.enums import IssueType
+from xseo.domain.urls import NormalizedUrl
 
 
 def _local_name(tag: str) -> str:
@@ -103,7 +104,45 @@ def detect_sitemap_issues(
             )
 
     issues.extend(_detect_stale_sitemap_urls(pages, sitemap_locs, severity_policy))
+    issues.extend(_detect_orphan_pages(crawl_id, pages, sitemap_locs, severity_policy))
     return tuple(issues)
+
+
+def _detect_orphan_pages(crawl_id, pages, sitemap_locs, severity_policy):
+    """Flag sitemap URLs the crawl never reached by following internal links.
+
+    The crawler discovers pages by walking internal links from the start page,
+    so a URL the sitemap lists but the crawl never reached has no internal link
+    path to it — the textbook definition of an orphan page. The start URL is
+    always crawled, so it can never be a false positive.
+    """
+    crawled = set()
+    for page in pages:
+        crawled.add(canonicalize(page.url.value))
+        crawled.add(canonicalize(page.final_url.value))
+
+    issues = []
+    reported = set()
+    for loc in sitemap_locs:
+        key = canonicalize(loc)
+        if key in crawled or key in reported:
+            continue
+        reported.add(key)
+        url = NormalizedUrl.create(loc)
+        if not url.ok:
+            continue
+        issues.append(
+            build_issue(
+                crawl_id,
+                None,
+                url.value,
+                IssueType.ORPHAN_PAGE,
+                "Listed in the sitemap but never reached by following internal "
+                "links from the start page; it may be orphaned.",
+                severity_policy,
+            )
+        )
+    return issues
 
 
 def _detect_stale_sitemap_urls(pages, sitemap_locs, severity_policy):

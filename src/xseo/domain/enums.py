@@ -64,6 +64,7 @@ class IssueType(StrEnum):
     SITEMAP_MISSING = "sitemap_missing"
     PAGE_MISSING_FROM_SITEMAP = "page_missing_from_sitemap"
     SITEMAP_STALE_URL = "sitemap_stale_url"
+    ORPHAN_PAGE = "orphan_page"
 
 
 class HeadingLevel(StrEnum):

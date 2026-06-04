@@ -154,7 +154,7 @@ def test_flags_noindex_sitemap_url():
     assert "noindex" in issues[0].explanation
 
 
-def test_uncrawled_sitemap_url_is_not_judged_stale():
+def test_uncrawled_sitemap_url_is_flagged_orphan_not_stale():
     page = _page(url=_url("https://example.com/a"))
 
     issues = detect_sitemap_issues(
@@ -165,4 +165,42 @@ def test_uncrawled_sitemap_url_is_not_judged_stale():
         base_url=_base_url(),
     )
 
+    # Crawled-and-listed /a is fine; the uncrawled /never-crawled is an orphan,
+    # never a stale URL (we have no status for it).
+    assert _issue_types(issues) == {IssueType.ORPHAN_PAGE}
+    assert issues[0].affected_url.value == "https://example.com/never-crawled"
+    assert issues[0].page_id is None
+    assert issues[0].severity == IssueSeverity.MEDIUM
+
+
+def test_crawled_sitemap_url_is_not_orphan():
+    page = _page(url=_url("https://example.com/a"))
+
+    issues = detect_sitemap_issues(
+        _crawl_id(),
+        (page,),
+        ("https://example.com/a",),
+        sitemap_found=True,
+        base_url=_base_url(),
+    )
+
     assert issues == ()
+
+
+def test_orphan_detection_matches_on_final_url_after_redirect():
+    # A sitemap that lists the post-redirect URL is not orphaned when the crawl
+    # reached it as a redirect target.
+    page = _page(
+        url=_url("https://example.com/old"),
+        final_url=_url("https://example.com/new"),
+    )
+
+    issues = detect_sitemap_issues(
+        _crawl_id(),
+        (page,),
+        ("https://example.com/new",),
+        sitemap_found=True,
+        base_url=_base_url(),
+    )
+
+    assert IssueType.ORPHAN_PAGE not in _issue_types(issues)
