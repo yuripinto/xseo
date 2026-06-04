@@ -112,6 +112,38 @@ def test_page_within_max_crawl_depth_is_not_flagged():
     assert IssueType.PAGE_TOO_DEEP not in _issue_types(issues)
 
 
+def test_flags_title_wider_than_pixel_limit_even_within_char_count():
+    # 60 wide chars: within the 60-char limit, but far past the pixel limit.
+    page = _page(title="W" * 60)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.TITLE_PIXEL_TOO_LONG in types
+    assert IssueType.TITLE_TOO_LONG not in types
+
+
+def test_narrow_title_of_same_length_is_not_pixel_flagged():
+    page = _page(title="i" * 60)
+
+    types = _issue_types(detect_page_issues(page, headings=(_h1(page),)))
+
+    assert IssueType.TITLE_PIXEL_TOO_LONG not in types
+
+
+def test_flags_meta_description_wider_than_pixel_limit():
+    page = _page(meta_description="W" * 80)
+
+    issues = detect_page_issues(page, headings=(_h1(page),))
+    types = _issue_types(issues)
+
+    assert IssueType.META_DESCRIPTION_PIXEL_TOO_LONG in types
+    assert IssueType.META_DESCRIPTION_TOO_LONG not in types
+    pixel_issue = next(
+        i for i in issues if i.issue_type == IssueType.META_DESCRIPTION_PIXEL_TOO_LONG
+    )
+    assert pixel_issue.severity == IssueSeverity.LOW
+
+
 def test_detects_multiple_h1_and_canonical_mismatch():
     final_url = _url("https://example.com/page")
     canonical_url = _url("https://example.com/canonical")
