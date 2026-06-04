@@ -47,6 +47,8 @@ class IssueSeverityPolicy:
             IssueType.OPEN_GRAPH_MISSING: IssueSeverity.LOW,
             IssueType.STRUCTURED_DATA_MISSING: IssueSeverity.LOW,
             IssueType.HREFLANG_NO_SELF_REFERENCE: IssueSeverity.MEDIUM,
+            IssueType.SITEMAP_MISSING: IssueSeverity.LOW,
+            IssueType.PAGE_MISSING_FROM_SITEMAP: IssueSeverity.LOW,
         }
     )
 

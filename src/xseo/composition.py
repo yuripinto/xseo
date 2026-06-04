@@ -30,6 +30,7 @@ from xseo.adapters.persistence import (
     SQLiteExportRepository,
     SQLiteResultsReadRepository,
 )
+from xseo.adapters.sitemap import HttpSitemapAuditor
 from xseo.application.services import (
     ExportApplicationService,
     ResultsApplicationService,
@@ -107,6 +108,9 @@ def build_services(db_path: Path | str = DEFAULT_DB) -> Services:
             robots_policy=robots_policy,
             request_delay_seconds=crawl.config.request_delay_seconds,
         )
+        sitemap_auditor = HttpSitemapAuditor(
+            httpx_robots_fetcher(crawl.config.timeout_seconds)
+        )
         coordinator = CrawlExecutionCoordinator(
             crawl_engine=engine,
             issue_analysis_service=IssueAnalysisService(),
@@ -115,6 +119,7 @@ def build_services(db_path: Path | str = DEFAULT_DB) -> Services:
             analysis_repository=analysis_repo,
             event_delivery=event_delivery,
             clock=clock,
+            sitemap_auditor=sitemap_auditor,
         )
 
         def work(stop_token: object) -> object:
