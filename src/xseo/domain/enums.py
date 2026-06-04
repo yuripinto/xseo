@@ -50,6 +50,9 @@ class IssueType(StrEnum):
     MISSING_VIEWPORT = "missing_viewport"
     MISSING_LANG = "missing_lang"
     MISSING_CHARSET = "missing_charset"
+    MIXED_CONTENT = "mixed_content"
+    OPEN_GRAPH_MISSING = "open_graph_missing"
+    STRUCTURED_DATA_MISSING = "structured_data_missing"
 
 
 class HeadingLevel(StrEnum):

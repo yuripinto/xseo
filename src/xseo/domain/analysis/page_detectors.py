@@ -210,4 +210,41 @@ def detect_page_issues(
             )
         )
 
+    if page.mixed_content_count > 0:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.MIXED_CONTENT,
+                f"{page.mixed_content_count} resources are loaded over http on an "
+                "https page; browsers may block them.",
+                severity_policy,
+            )
+        )
+
+    if not page.has_open_graph:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.OPEN_GRAPH_MISSING,
+                "Page has no Open Graph tags, so social shares lack a rich preview.",
+                severity_policy,
+            )
+        )
+
+    if not page.has_structured_data:
+        issues.append(
+            build_issue(
+                page.crawl_id,
+                page.page_id,
+                page.final_url,
+                IssueType.STRUCTURED_DATA_MISSING,
+                "Page has no JSON-LD structured data for rich search results.",
+                severity_policy,
+            )
+        )
+
     return tuple(issues)

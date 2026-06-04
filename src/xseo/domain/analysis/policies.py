@@ -43,6 +43,9 @@ class IssueSeverityPolicy:
             IssueType.MISSING_VIEWPORT: IssueSeverity.MEDIUM,
             IssueType.MISSING_LANG: IssueSeverity.LOW,
             IssueType.MISSING_CHARSET: IssueSeverity.LOW,
+            IssueType.MIXED_CONTENT: IssueSeverity.HIGH,
+            IssueType.OPEN_GRAPH_MISSING: IssueSeverity.LOW,
+            IssueType.STRUCTURED_DATA_MISSING: IssueSeverity.LOW,
         }
     )
 

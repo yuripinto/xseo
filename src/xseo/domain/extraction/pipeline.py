@@ -36,13 +36,18 @@ class SeoExtractionPipeline:
             body = fetch_result.body or b""
             html = _decode_body(body, encoding)
             tree = HTMLParser(html)
-            visible_text = _visible_text(tree)
             final_url = fetch_result.final_url or fetch_result.requested_url
             canonical = _canonical_url(tree, final_url, self.normalizer)
             image_count, images_missing_alt = _image_alt_stats(tree)
             has_viewport = _has_meta(tree, "viewport")
             has_lang = _has_lang(tree)
             has_charset = _has_charset(tree)
+            has_open_graph = _has_open_graph(tree)
+            has_structured_data = _has_structured_data(tree)
+            mixed_content_count = _mixed_content_count(tree, final_url)
+            # _visible_text strips <script>/<style> nodes, so it must run only
+            # after the signals above that inspect those tags.
+            visible_text = _visible_text(tree)
 
             page = ExtractedPage(
                 page_id=page_id,
@@ -63,6 +68,9 @@ class SeoExtractionPipeline:
                 has_viewport=has_viewport,
                 has_lang=has_lang,
                 has_charset=has_charset,
+                has_open_graph=has_open_graph,
+                has_structured_data=has_structured_data,
+                mixed_content_count=mixed_content_count,
             )
             headings = _headings(tree, page_id)
             links = extract_raw_links(tree, final_url)
@@ -162,6 +170,43 @@ def _has_charset(tree):
         node = tree.css_first('meta[http-equiv="content-type"]')
     content = (node.attributes.get("content") or "") if node is not None else ""
     return "charset" in content.lower()
+
+
+def _has_open_graph(tree):
+    # og:title is the minimum signal that Open Graph cards are configured.
+    return tree.css_first('meta[property="og:title"]') is not None
+
+
+def _has_structured_data(tree):
+    # JSON-LD is the dominant structured-data format; microdata is rarer and
+    # noisier to detect, so we treat a JSON-LD block as the signal.
+    return tree.css_first('script[type="application/ld+json"]') is not None
+
+
+# Sub-resource references that load content into the page; an http:// URL here
+# on an https page is mixed content the browser may block or warn about.
+_MIXED_CONTENT_SELECTORS = (
+    ("img", "src"),
+    ("script", "src"),
+    ("iframe", "src"),
+    ("audio", "src"),
+    ("video", "src"),
+    ("source", "src"),
+    ('link[rel="stylesheet"]', "href"),
+)
+
+
+def _mixed_content_count(tree, final_url):
+    base = final_url.value if hasattr(final_url, "value") else str(final_url)
+    if not base.lower().startswith("https://"):
+        return 0
+    count = 0
+    for selector, attr in _MIXED_CONTENT_SELECTORS:
+        for node in tree.css(selector):
+            value = (node.attributes.get(attr) or "").strip().lower()
+            if value.startswith("http://"):
+                count += 1
+    return count
 
 
 def _visible_text(tree):
