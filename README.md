@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 
-> A local-first desktop SEO crawler. Audit your site on your own machine — no cloud, no accounts, no data leaves your computer.
+> A local-first SEO crawler for your desktop and your terminal. Audit your site on your own machine — no cloud, no accounts, no data leaves your computer.
 
-`xseo` is a desktop application that crawls a website, extracts on-page SEO signals, detects common issues and content duplication, and renders the results in a clean UI. Everything runs locally and persists to a single SQLite file under `~/.xseo/`.
+`xseo` crawls a website, extracts on-page SEO signals, detects common issues and content duplication, and shows the results in a clean desktop UI — or runs **headless from the command line** so you can pipe reports into other tools and gate CI on SEO regressions. Everything runs locally and persists to a single SQLite file under `~/.xseo/`.
 
 ![xseo crawling a site live](docs/images/xseo-demo.gif)
 
